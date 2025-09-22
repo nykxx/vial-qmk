@@ -46,6 +46,27 @@ const char* keycode_to_name(uint16_t keycode) {
         case KC_9: return "9   ";
         case KC_0: return "0   ";
         
+        // Number Pad
+        case KC_PSLS: return "/   ";
+        case KC_PAST: return "*   ";
+        case KC_PMNS: return "-   ";
+        case KC_PPLS: return "+   ";
+        case KC_PENT: return "ENT ";
+        case KC_P1:   return "1   ";
+        case KC_P2:   return "2   ";
+        case KC_P3:   return "3   ";
+        case KC_P4:   return "4   ";
+        case KC_P5:   return "5   ";
+        case KC_P6:   return "6   ";
+        case KC_P7:   return "7   ";
+        case KC_P8:   return "8   ";
+        case KC_P9:   return "9   ";
+        case KC_P0:   return "0   ";
+        case KC_PDOT: return ".   ";
+        case KC_PEQL: return "=   ";
+        case KC_PCMM: return ",   ";
+
+
         // 記号キーなど
         case KC_ENTER: return "ENT ";
         case KC_ESC:   return "ESC ";
@@ -112,9 +133,20 @@ const char* keycode_to_name(uint16_t keycode) {
         case KC_PGUP: return "PGUP";
         case KC_PGDN: return "PGDN";
         case KC_END:  return "END ";
+
         // その他特殊キーなど
         case KC_NO:  return "    "; // No key
-        case 0x0001: return "same"; // ▽
+        case 0x0001: return "trns"; // ▽
+        case KC_CAPS: return "CAPS"; // CapsLock
+        case KC_SCRL: return "SCRL"; // ScrollLock
+        case KC_NUM: return "NUM ";  // NumLock
+        case KC_INS: return "INS ";  // Insert
+        case KC_PSCR: return "PRNT"; // PrintScreen
+        case KC_PAUS: return "PAUS"; // Pause
+        case KC_MENU: return "MENU";  // Menu
+        case KC_KB_MUTE: return "MUTE"; // Mute
+        case KC_INT4: return "HEN ";  // 変換
+        case KC_INT5: return "MHEN";  // 無変換
         case 0x0104: return "ALL ";  // Ctrl+A
         case 0x0109: return "FIND"; // Ctrl+F
         case 0x011B: return "CUT "; // Ctrl+X
@@ -124,6 +156,7 @@ const char* keycode_to_name(uint16_t keycode) {
         case 0x0119: return "PSTE"; // Ctrl+V
         case 0x0819: return "PSTE"; // Win+v
         case 0x022E: return "+   "; 
+        case 0x0A16: return "PRNT"; // Win+Shift+S
         // 未定義キー
         default:
             snprintf(unknown_keycode, sizeof(unknown_keycode), "%04X", keycode);
