@@ -157,6 +157,32 @@ const char* keycode_to_name(uint16_t keycode) {
         case 0x0819: return "PSTE"; // Win+v
         case 0x022E: return "+   "; 
         case 0x0A16: return "PRNT"; // Win+Shift+S
+
+        // Tap-Dance
+        case 0x5700: return "TD00";
+        case 0x5701: return "TD01";
+        case 0x5702: return "TD02";
+        case 0x5703: return "TD03";
+        case 0x5704: return "TD04";
+        case 0x5705: return "TD05";
+        case 0x5706: return "TD06";
+        case 0x5707: return "TD07";
+        case 0x5708: return "TD08";
+        case 0x5709: return "TD09";
+        case 0x570A: return "TD10";
+
+        // Macro
+        case 0x7700: return "M00 ";
+        case 0x7701: return "M01 ";
+        case 0x7702: return "M02 ";
+        case 0x7703: return "M03 ";
+        case 0x7704: return "M04 ";
+        case 0x7705: return "M05 ";
+        case 0x7706: return "M06 ";
+        case 0x7707: return "M07 ";
+        case 0x7708: return "M08 ";
+        case 0x7709: return "M09 ";
+        case 0x770A: return "M10 ";
         // 未定義キー
         default:
             snprintf(unknown_keycode, sizeof(unknown_keycode), "%04X", keycode);

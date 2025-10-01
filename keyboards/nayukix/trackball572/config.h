@@ -1,0 +1,19 @@
+#pragma once
+//#define POINTING_DEVICE_ENABLE  ここじゃなくてkeyboard.jsonに書かないとだめだった
+
+//#define POINTING_DEVICE_CS_PIN NO_PIN
+#define POINTING_DEVICE_CS_PIN GP1
+#define POINTING_DEVICE_ROTATION_90
+#define POINTING_DEVICE_SCLK_PIN GP2
+#define POINTING_DEVICE_SDIO_PIN GP0
+// Not supported for split keyboard
+#define POINTING_DEVICE_MOTION_PIN GP28
+
+// 分割のときはこれら
+//#define SPLIT_POINTING_ENABLE
+//#define POINTING_DEVICE_LEFT
+//#define POINTING_DEVICE_RIGHT
+
+#define POINTING_DEVICE_INVERT_Y
+
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE
