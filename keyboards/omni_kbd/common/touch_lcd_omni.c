@@ -382,7 +382,7 @@ void measure_pulse(uint8_t interrupt_pin) {
 #include "hardware/gpio.h"
 
 #define SAMPLE_MS       1
-#define WINDOW_SLOTS    100
+#define WINDOW_SLOTS    85 // change 100 > 85
 
 static uint8_t  buf[WINDOW_SLOTS];
 static uint8_t  idx = 0;
@@ -426,6 +426,9 @@ void touch_buf_init(void) {
     slot_t0 = timer_read();
 }
 
+uint8_t contact_off_hold_ms = 15;
+static uint16_t off_hold_t0 = 0;
+
 void touch_buf_tick(void) {
     if (gpio_get_irq_event_mask(INT_PIN) & GPIO_IRQ_EDGE_FALL) {
         slot_low_seen = true;
@@ -441,20 +444,41 @@ void touch_buf_tick(void) {
         slot_t0 += SAMPLE_MS;
         slot_low_seen = false;
 
+        // add debounce logic
+        // if (!T.in_contact) {
+        //     if (count_low >= 1) { 
+        //         T.in_contact = true; 
+        //         uprintf("[TOUCH] DOWN (count=%u)\n", count_low); 
+        //     }
+        // } else {
+        //     if (count_low == 0) { 
+        //         T.in_contact = false; 
+        //         uprintf("[TOUCH] UP   (count=%u)\n", count_low); 
+        //     }
+        // }
+
         if (!T.in_contact) {
-            if (count_low >= 1) { 
-                T.in_contact = true; 
-                // uprintf("[TOUCH] DOWN (count=%u)\n", count_low); 
+            if (count_low >= 1) {
+                T.in_contact = true;
+                off_hold_t0 = 0;
+                uprintf("[TOUCH] DOWN (count=%u)\n", count_low);
             }
         } else {
-            if (count_low == 0) { 
-                T.in_contact = false; 
-                // uprintf("[TOUCH] UP   (count=%u)\n", count_low); 
+            if (count_low == 0) {
+                if (off_hold_t0 == 0) {
+                    off_hold_t0 = timer_read();
+                } else if (timer_elapsed(off_hold_t0) >= contact_off_hold_ms) {
+                    T.in_contact = false;
+                    off_hold_t0 = 0;
+                    uprintf("[TOUCH] UP   (count=%u)\n", count_low);
+                }
+            } else {
+                off_hold_t0 = 0;
             }
         }
+
     }
 }
-
  
 bool touch_buf_init_flag = false;
 static uint16_t fast_touch_time = 0;
@@ -494,8 +518,11 @@ void process_gesture(void){
     }
 }
 
+// add dedzone
+uint8_t press_deadzone = 6;
 void touch_mode_detected(int16_t x, int16_t y){
-    if (x == 0 && y == 0) {
+    // if (x == 0 && y == 0) {
+    if (abs(x) < press_deadzone && abs(y) < press_deadzone) {
         touch_mode = TOUCH_MODE_PRESS;
     } else {
         touch_mode = TOUCH_MODE_SWIPE;
@@ -545,7 +572,7 @@ void process_touch_interrupt(void) {
 
             fast_touch_time = timer_read();;
             touch_state = TOUCH_STATE_START;
-            // uprintf("------START------\n");
+            uprintf("------START------\n");
             // static uint16_t db_crood;
             // if (pre_touch_x != db_crood) {
             //     uprintf("pre crood: %d\n", pre_touch_x);
@@ -564,6 +591,8 @@ void process_touch_interrupt(void) {
                 second_touch_time = timer_read();
                 int16_t x = now_touch_x - pre_touch_x;
                 int16_t y = now_touch_y - pre_touch_y;
+                uprintf("crood: %d %d\n", x, y);
+
                 touch_mode_detected(x, y);
                 swipe_gesture_id_detected(x, y);
                 process_gesture();
