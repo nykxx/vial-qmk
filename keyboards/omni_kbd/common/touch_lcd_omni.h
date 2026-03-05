@@ -17,6 +17,7 @@ typedef enum {
     DISPLAY_MODE_TRACKBALL_TUNING,
     DISPLAY_MODE_SWIPE_GESTURE,
     DISPLAY_MODE_KEY_MATRIX,
+    DISPLAY_MODE_STATUS1,
 } display_mode_t;
 
 typedef struct {
@@ -36,6 +37,7 @@ extern ImagePosition lcd_layer_app_images[MAX_LCD_CATEGORY + 1][MAX_LCD_LAYER + 
 extern uint8_t current_layer;
 extern uint8_t current_lcd_layer;
 extern uint8_t current_lcd_category;
+extern painter_font_handle_t noto9_font;
 extern painter_font_handle_t noto11_font;
 extern painter_font_handle_t roboto_mono16;
 extern painter_font_handle_t st2_mono16;
@@ -46,6 +48,7 @@ extern bool touch_signal;
 extern bool touch_start_flag;
 extern bool initial_touch_flag;
 extern bool touch_signal_view_update;
+extern uint16_t touch_repeat_interval;
 extern uint8_t gesture_id;
 const char *get_layer_name(uint8_t layer); 
 

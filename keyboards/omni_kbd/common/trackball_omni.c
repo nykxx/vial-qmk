@@ -6,16 +6,22 @@
 #include <print.h>
 #include "trackball_omni.h"
 #include "timer.h"
+#include "config_omni.h"
+#include "status_view.h"
 
 #define constrain_hid(amt) ((amt) < -127 ? -127 : ((amt) > 127 ? 127 : (amt)))
 #define constrain_hid16(amt) ((amt) < -32767 ? -32767 : ((amt) > 32767 ? 32767 : (amt)))
 
-int8_t ud_sc_mode_flag = 1;
-int8_t lr_sc_mode_flag = 1;
 static float accumulated_x = 0.0f;
 static float accumulated_y = 0.0f;
 static float accumulated_h = 0.0f;
 static float accumulated_v = 0.0f;
+
+static inline uint8_t clamp_1_100_x(int16_t x) {
+    if (x < 1) x = 1;
+    if (x > 100) x = 100;
+    return (uint8_t)x;
+}
 
 void process_cursor_report(report_mouse_t *mouse_report, pmw33xx_report_t report, float speed_adjust, uint8_t slope_factor, int rx, int ry, uint8_t cpi_scale) {
     if (!report.motion.b.is_lifted) {
@@ -57,23 +63,16 @@ void process_high_res_scroll_report(report_mouse_t *mouse_report, pmw33xx_report
         } else {
             accumulated_v += y_corr;
         }
-        if (fabs(accumulated_v) >= 1.0f) {
-            mouse_report->v = constrain_hid16(mouse_report->v + accumulated_v);
+
+        if (fabs(accumulated_v) >= 1.0f * (clamp_1_100_x(hi_res_interval_v) * 12 / 10)) {
+            mouse_report->v = constrain_hid16(mouse_report->v + accumulated_v) / (clamp_1_100_x(hi_res_value_v) * 12 / 10);
             accumulated_v = 0;
         }
-        if (fabs(accumulated_h) >= 120.0f) {
-            mouse_report->h = -constrain_hid16(mouse_report->h + accumulated_h);
+
+        if (fabs(accumulated_h) >= 1.0f * (clamp_1_100_x(hi_res_interval_h) * 12 / 10)) {
+            mouse_report->h = -constrain_hid16(mouse_report->h + accumulated_h) / (clamp_1_100_x(hi_res_value_h) * 12 / 10);
             accumulated_h = 0;
         }
-
-        // static uint16_t dbg_timer = 0;
-        // if (timer_elapsed(dbg_timer) > 500) {
-        //     dg_timer = timer_read();
-        //     uprintf("----------------------\n");
-        //     uprintf("x : %d, y : %d\n", (int16_t)x, (int16_t)y);
-        //     uprintf("ax : %d, ay : %d\n", (int16_t)mouse_report->h, (int16_t)mouse_report->v);
-        // }
-
     }
 }
 

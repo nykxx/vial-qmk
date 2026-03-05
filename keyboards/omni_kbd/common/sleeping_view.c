@@ -23,10 +23,10 @@ static uint8_t char_count = sizeof(characters) - 1;
 
 void init_matrix_code_rain(void) {
     for (int i = 0; i < RAIN_MAX_COLUMNS; i++) {
-        codeDrops[i].x = rand() % TOUCH_LCD_WIDTH;  // ランダムなX座標を設定
-        codeDrops[i].y = rand() % (TOUCH_LCD_HEIGHT / 2);  // 上半分に配置
+        codeDrops[i].x = rand() % TOUCH_LCD_WIDTH;
+        codeDrops[i].y = rand() % (TOUCH_LCD_HEIGHT / 2);
         codeDrops[i].character = characters[rand() % char_count];
-        codeDrops[i].fade = FADE_STEPS;  // 初期のフェード値を設定
+        codeDrops[i].fade = FADE_STEPS;
     }
 }
 

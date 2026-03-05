@@ -24,16 +24,14 @@
   { "name": "V Sub UP", "title": "Increase sub color brightness", "shortName": "SubV+" },
   { "name": "V Sub DW", "title": "Decrease sub color brightness", "shortName": "SubV-" },
 
-  { "name": "Auto Mouse", "title": "Toggle automatic mouse control", "shortName": "AmlTg" },
   { "name": "Right TB Mode", "title": "Toggle right trackball mode", "shortName": "TbrCg" },
   { "name": "Left TB Mode", "title": "Toggle left trackball mode", "shortName": "TblCg" },
-  { "name": "UD Scroll change", "title": "Toggle UD scroll", "shortName": "UDSc" },
-  { "name": "LR Scroll change", "title": "Toggle LR scroll", "shortName": "LRSc" },
 
   { "name": "Touch Key", "title": "Activate touch key mode", "shortName": "TcKey" },
   { "name": "TB Tune", "title": "Activate trackball tuning mode", "shortName": "TbTun" },
   { "name": "Swipe Gesture", "title": "Activate swipe gesture mode", "shortName": "SwGst" },
-  { "name": "Touch Matrix", "title": "Activate keymap mode", "shortName": "KeyMp" }
+  { "name": "Touch Matrix", "title": "Activate keymap mode", "shortName": "KeyMp" },
+  { "name": "Status1", "title": "Activate status1", "shortName": "Stat1" }
  ],
 
   "matrix": {

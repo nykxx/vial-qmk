@@ -26,7 +26,6 @@ const char* get_display_string_from_keycode(uint16_t keycode);
 
 void draw_key_matrix(painter_device_t display, painter_font_handle_t font1, painter_font_handle_t font2, uint8_t current_layer);
 
-// 独自グリフマクロの定義（ASCIIにマッピングした場合）
 #define F1   ' '
 #define F2   '!'
 #define F3   '"'

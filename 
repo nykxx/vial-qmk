@@ -1,0 +1,233 @@
+[33mcommit 8bcbf4a205e4bbbfcab9322b8323f19682caa8b4[m[33m ([m[1;36mHEAD -> [m[1;32mvial[m[33m, [m[1;33mtag: v00.03.00[m[33m)[m
+Author: masatokondo <masatokondou0114@gmail.com>
+Date:   Fri Jul 18 21:43:36 2025 +0900
+
+    Add omni_kbd icon update
+
+[33mcommit 1c81ac260361a0ebe6edebe9413fe393c1988189[m
+Author: masatokondo <masatokondou0114@gmail.com>
+Date:   Fri Jul 18 21:37:12 2025 +0900
+
+    Add omni_kbd icon/img assets and update .gitignore
+
+[33mcommit 709eacf6d1f54371b190acd8cef5e3dcddc2f2c7[m[33m ([m[1;31morigin/vial[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: masatokondo <masatokondou0114@gmail.com>
+Date:   Fri Jul 18 21:23:13 2025 +0900
+
+    Add omni_kbd keyboard
+
+[33mcommit 967967e122427050da4e23939130a11cc273e4fc[m
+Merge: 9a60a335a8 4152685aa1
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jul 12 17:06:05 2025 -0600
+
+    Merge branch 'merge-2025-06-21' into vial
+
+[33mcommit 4152685aa1a228760e70a4464fd19456eab434bf[m
+Author: Pascal Getreuer <50221757+getreuer@users.noreply.github.com>
+Date:   Thu Jul 3 23:21:47 2025 -0700
+
+    Re-enable Caps Word and Layer Lock where possible. (#907)
+    
+    * Re-enable features for some keyboards, A-G.
+    
+    * Re-enable features for some keyboards, H-K.
+    
+    * Re-enable features for some keyboards, L-R.
+    
+    * Re-enable features for some keyboards, S-V.
+    
+    * Re-enable features for some keyboards, W-Z.
+
+[33mcommit 06c5bacdd6041a70ff01990ae7d57c7302a28705[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sun Jun 29 16:00:28 2025 -0600
+
+    mass disable CAPS_WORD_ENABLE, LAYER_LOCK_ENABLE, REPEAT_KEY_ENABLE on failing keyboards
+
+[33mcommit f5eb9a8e928ea50847a95f456d81584a88be305e[m
+Author: Pascal Getreuer <50221757+getreuer@users.noreply.github.com>
+Date:   Sun Jun 29 14:32:04 2025 -0700
+
+    Add Repeat Key and Alt Repeat Key to vial-qmk. (#906)
+    
+    * Repeat Key for vial-qmk.
+    
+    * Add new keycodes to vial_ensure_keycode.h.
+
+[33mcommit 000d5fd8d3a3ff57193be894d69e59acb6fad69c[m
+Author: Pascal Getreuer <50221757+getreuer@users.noreply.github.com>
+Date:   Sat Jun 28 23:54:21 2025 -0700
+
+    Fix where -DCAPS_WORD_INVERT_ON_SHIFT is added. (#905)
+
+[33mcommit 9a60a335a8168032f49ee8194b8257d69dd0375d[m
+Author: chillKB <107592205+chillKB@users.noreply.github.com>
+Date:   Sat Jun 28 21:53:59 2025 -0700
+
+    add Vial support for ghoul TKL (#904)
+
+[33mcommit 7afc4ba45cfc89b0bc1c7b0470ae467542160e28[m
+Author: Nam <hey@sunsetsonwheels.me>
+Date:   Sun Jun 29 07:52:38 2025 +1000
+
+    Add zed60 vial support (#903)
+
+[33mcommit 15a3bb1ab9f9cc0741d1e04fa81031a1d226eb37[m
+Author: Pascal Getreuer <50221757+getreuer@users.noreply.github.com>
+Date:   Sat Jun 28 14:52:16 2025 -0700
+
+    PDF(layer), Caps Word, and Layer Lock for vial-qmk. (#902)
+    
+    * Caps Word and Layer Lock for vial-qmk.
+    
+    * Enable Caps Word and Layer Lock. Set CAPS_WORD_INVERT_ON_SHIFT.
+    * Use the last bits of dynamic_vial_get_number_of_entries to indicate
+      optionally supported features.
+    * Vial protocol version was already bumped to 6, matching the bump on
+      made on the GUI side corresponding to this change.
+    
+    * Add new keycodes to vial_ensure_keycode.h.
+
+[33mcommit 02a98ccd7104a9fe1600fced4881dec0060b4416[m
+Author: Gilbert Creemers <144808356+FlamingPhoenix40@users.noreply.github.com>
+Date:   Mon Jun 23 04:52:16 2025 +0200
+
+    Add Vial support to ProjectD Tinker 65 ANSI (#895)
+    
+    * Add support for ProjectD Tinker65 ANSI
+    
+    Reduced nr. of layers from 13 to 4 and disabled some features to save space, because otherwise wouldn't fit EPROM
+    
+    * All features enabled by default
+    
+    All features now enabled by default, and only nr. of layers reduced to make fit. Can uncomment lines in rules.mk to squeeze a bit more free space out if features are not needed.
+    
+    * Fix nr. of layers in keyboard.json
+    
+    When uploading to github for the pull request, forgot to edit the keyboard.json to decrease the number of layers. Only did that in my local offline clone.
+    
+    * Moved layer reduction to vial/config.h and reverted main keyboard.json
+    
+    Reverted main keyboard.json back to default for upstream QMK compatibility. Put redefinition of layers back in vial/config.h but added a #undef to get rid of the definition from keyboard.json that caused this method to not build.
+
+[33mcommit e6dee240f9cfd70503de6d361127d5c11f80fa2a[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sun Jun 22 12:15:59 2025 -0600
+
+    mass disable qmk settings on too big keyboards
+
+[33mcommit c94a57d613a7420453f3377b8de32bbadf4ed5f3[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 19:46:37 2025 -0600
+
+    qmk_settings: add flow tap
+
+[33mcommit 3af5b0b0f737b96a5a8258d83bc7ee252762077d[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Fri May 30 01:47:23 2025 -0600
+
+    qmk_settings: add chordal hold
+
+[33mcommit 3eb60770d965f5a1f27dd411f1b5e6b157440928[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Fri May 30 01:22:02 2025 -0600
+
+    qmk_settings: refactor tapping to use new bit settings
+    
+    instead of handling bits on the GUI side, this handles them on the
+    firmware side
+    this allows for every individual bit to have its own qsid
+
+[33mcommit 9e9a801f32a583aed8d3066e30ce2b8ea147360d[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 19:34:47 2025 -0600
+
+    fix broken keyboards after merge
+
+[33mcommit 819ce086ea6f9bcf8b2f96059e2d9bc744567d19[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 16:28:49 2025 -0600
+
+    vialrgb: fix vialrgb_save after rename
+
+[33mcommit 66cf6cb83dd737c74f87d742733de5ff35ee60c2[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 16:16:31 2025 -0600
+
+    nvm_dynamic_keymap: fix cast
+
+[33mcommit 4d7540b80cedbd18b93049b6cb4787ccb217f49b[m
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 16:11:03 2025 -0600
+
+    update github ci container
+
+[33mcommit 7b247bc8005ed8a2b38525a64d1873841939342f[m
+Merge: b2f9fd0123 664c0bc4c3
+Author: Ilya Zhuravlev <whatever@xyz.is>
+Date:   Sat Jun 21 16:00:42 2025 -0600
+
+    Merge remote-tracking branch 'qmk/master' into merge-2025-06-21
+
+[33mcommit 664c0bc4c32d3f2c287f02ef4f786c32c0f51cb9[m
+Author: YodaDistro <55962164+YodaDistro@users.noreply.github.com>
+Date:   Sat Jun 21 06:31:49 2025 -0500
+
+    Add YodaDistro Macropad (#25174)
+    
+    Co-authored-by: Joel Challis <git@zvecr.com>
+    Co-authored-by: Drashna Jaelre <drashna@live.com>
+    Co-authored-by: Less/Rikki <86894501+lesshonor@users.noreply.github.com>
+
+[33mcommit b2f9fd012395d4bacf2e2e12a6b6ebbd0ac71310[m
+Author: Jacky@LAZYDESIGNERS <jacky_lijun@126.com>
+Date:   Sat Jun 21 16:04:22 2025 +0800
+
+    Add support for lazydesigners/duo60 (#898)
+    
+    Add support for lazydesigners/duo60
+
+[33mcommit f7ad5d1a65b3379e571ad4439a02227bdada356d[m
+Author: Dane Lipscombe <danelipscombe@gmail.com>
+Date:   Sat Jun 21 18:03:47 2025 +1000
+
+    Add Harite v2 (#897)
+    
+    * Add Harite v2
+    
+    * Fix keycode
+    
+    * Add default layout
+
+[33mcommit 6626084cb8a77bb1e0d94082722fd21d783f4b27[m
+Author: ClownFish <177758267+clownfish-og@users.noreply.github.com>
+Date:   Thu Jun 19 17:24:37 2025 -0400
+
+    fix incorrect damapad layout macros (#25364)
+
+[33mcommit bb27c69675f1adfd91d8bfc3cf6f7fd537f74729[m
+Author: Marius <42906082+craft-coder@users.noreply.github.com>
+Date:   Thu Jun 19 23:23:53 2025 +0200
+
+    Applied usb detection fixes from Squalius-cephalus (#25380)
+    
+    Co-authored-by: Dr. Marius Feilhauer <software@feilhauer.de>
+
+[33mcommit 03a53e29af8983e1d3185fc6557312f341ec4c9f[m
+Author: Christoffer Larsen <itsgonnabealongnight@gmail.com>
+Date:   Thu Jun 19 23:15:54 2025 +0200
+
+    Fix Enter key matrix coordinates for smk65/revf ISO layout (#25373)
+
+[33mcommit 096696d86dc7f924a61f43428096107505f3cb45[m
+Author: Xelus22 <17491233+Xelus22@users.noreply.github.com>
+Date:   Wed Jun 18 19:44:49 2025 +1000
+
+    [Bug] Fix `usb_endpoint_interface_lut` multiple def compile err (#25378)
+
+[33mcommit 7f9ceef3dd52066b6349130a93bfc681cd435d68[m
+Author: Nick Brassel <nick@tzarc.org>
+Date:   Sun Jun 15 11:56:10 2025 +1000
+
+    More compiledb fixes. (

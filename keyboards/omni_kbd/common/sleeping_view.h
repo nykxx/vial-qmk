@@ -4,8 +4,6 @@
 #define RAIN_MAX_ROWS 20
 #define CHAR_SPACING 12
 #define CHAR_SIZE 12
-// #define SCREEN_WIDTH 240
-// #define SCREEN_HEIGHT 240
 #define FALL_SPEED 3
 #define FADE_STEPS 30
 

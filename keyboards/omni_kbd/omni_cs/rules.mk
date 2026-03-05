@@ -7,6 +7,8 @@ NKRO_ENABLE = yes           # Enable N-Key Rollover
 DYNAMIC_MACRO_ENABLE = yes
 DYNAMIC_KEYMAP_ENABLE = yes
 CUSTOM_MATRIX = lite		# duplex matrix
+OS_DETECTION_ENABLE = yes 
+
 SRC += matrix.c
 
 POINTING_DEVICE_ENABLE = yes
@@ -23,10 +25,11 @@ QUANTUM_LIB_SRC += spi_master.c
 QUANTUM_PAINTER_ENABLE = yes
 QUANTUM_PAINTER_DRIVERS += gc9a01_spi
 SRC += ../common/draw_custom.c
+SRC += ../font/noto9.qff.c
 SRC += ../font/noto11.qff.c
 SRC += ../font/roboto_mono16.qff.c
 SRC += ../font/st2_mono16.qff.c
-SRC += ../icon\omni_image_loader.c
+SRC += ../icon/omni_image_loader.c
 SRC += ../icon/generated/omni_logo.qgf.c
 SRC += ../icon/generated/save.qgf.c
 SRC += ../icon/generated/layer_00.qgf.c
@@ -140,6 +143,7 @@ SRC += ../common/trackball_omni.c
 SRC += ../common/config_omni.c
 SRC += ../common/touch_lcd_omni.c
 SRC += ../common/power_lcd.c
+SRC += ../common/status_view.c
 
 # SRC += ../common/keymap_changed_hook.c
 LDFLAGS += -Wl,--wrap=dynamic_keymap_set_keycode

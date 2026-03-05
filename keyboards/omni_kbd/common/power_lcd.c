@@ -5,7 +5,7 @@
 #include "wait.h"
 #include "gpio.h"
 
-static painter_device_t lcd_display = NULL;   /* ← 型を変更 */
+static painter_device_t lcd_display = NULL;
 static uint8_t       lcd_blk_pin = 0;
 static bool          lcd_is_on   = false;
 
