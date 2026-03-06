@@ -1,0 +1,47 @@
+{
+    "keyboard_name": "trabo572", 
+    "maintainer": "nayu", 
+    "manufacturer": "nayu",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "diode_direction": "COL2ROW",
+    "url": "",
+    "usb": {
+      "device_version": "1.0.0",
+      "pid": "0x1001",
+      "vid": "0xFEC0"
+  },
+    "features": {
+      "bootmagic": true,
+      "command": false,
+      "console": false,
+      "extrakey": true,
+      "mousekey": true,
+      "nkro": true,
+      "wpm":false,
+      "encoder":false,
+      "pointing_device": true
+  },
+  
+ "dynamic_keymap": {
+     "layer_count": 5
+  },
+
+   "matrix_pins": {
+      		"direct": [
+			        ["GP12","GP16","GP13","GP14","GP15"]
+		      ]
+
+  },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                 {"matrix":[0,0], "x":0, "y":0}, 
+                 {"matrix":[0,1], "x":4, "y":0}, 
+                 {"matrix":[0,2], "x":0.5, "y":2},
+                 {"matrix":[0,3], "x":2, "y":2}, 
+                 {"matrix":[0,4], "x":3.5, "y":2}
+                ]            
+        }
+    }
+}
