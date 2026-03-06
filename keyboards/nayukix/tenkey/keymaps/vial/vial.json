@@ -1,0 +1,87 @@
+{
+    "name": "macro-ten-key",
+    "vendorId": "0xFEC0",
+    "productId": "0x1000",
+    "matrix": {
+        "rows": 5,
+        "cols": 4
+    },
+    "customKeycodes": [
+    {
+      "shortName": "TOG/\nKEY/\nVIEW",
+      "title": "Toggle ANSI/JIS",
+      "name": "TOG_VIEW"
+    }
+  ],
+    "layouts": {
+        "labels": [
+            [
+                "Layout",
+                "LAYOUT"
+            ]
+        ],
+        "keymap": [
+            [
+                {
+                    "x": 0.75
+                },
+                "0,0\n\n\n0,0",
+                {
+                    "x": 1.5
+                },
+                "0,1\n\n\n0,0",
+                {
+                    "x": -4,
+                    "y": -1
+                },
+                "0,0\n\n\n\n\n\n\n\n\ne",
+                "0,1\n\n\n\n\n\n\n\n\ne",
+                {
+                    "x": 0.75
+                },
+                "1,0\n\n\n\n\n\n\n\n\ne",
+                "1,1\n\n\n\n\n\n\n\n\ne"
+            ],
+            [
+                {
+                    "y": 1
+                },
+                "1,0\n\n\n0,0",
+                {
+                    "x": 0.75
+                },
+                "1,1\n\n\n0,0",
+                "1,2\n\n\n0,0",
+                "1,3\n\n\n0,0"
+            ],
+            [
+                "2,0\n\n\n0,0",
+                {
+                    "x": 0.75
+                },
+                "2,1\n\n\n0,0",
+                "2,2\n\n\n0,0",
+                "2,3\n\n\n0,0"
+            ],
+            [
+                "3,0\n\n\n0,0",
+                {
+                    "x": 0.75
+                },
+                "3,1\n\n\n0,0",
+                "3,2\n\n\n0,0",
+                "3,3\n\n\n0,0"
+            ],
+            [
+                "4,0\n\n\n0,0",
+                {
+                    "x": 0.75
+                },
+                "4,1\n\n\n0,0",
+                "4,2\n\n\n0,0",
+                "4,3\n\n\n0,0"
+            ],
+            []
+        ]
+    }
+}

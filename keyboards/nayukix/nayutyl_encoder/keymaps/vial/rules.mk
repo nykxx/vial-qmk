@@ -1,0 +1,20 @@
+VIA_ENABLE = yes
+VIAL_ENABLE = yes
+VIALRGB_ENABLE = no
+
+QMK_SETTINGS = yes
+TAP_DANCE_ENABLE = yes
+COMBO_ENABLE = yes
+KEY_OVERRIDE_ENABLE = yes
+EXTRAKEY_ENABLE = yes
+MAGIC_ENABLE = yes
+GRAVE_ESC_ENABLE = yes
+MOUSEKEY_ENABLE = yes
+NKRO_ENABLE = yes
+ENCODER_MAP_ENABLE = yes
+
+
+WPM_ENABLE = yes
+
+SRC += keycode_utils.c
+SRC += nayutyl.c

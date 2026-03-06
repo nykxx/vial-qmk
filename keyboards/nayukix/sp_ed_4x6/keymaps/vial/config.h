@@ -1,0 +1,6 @@
+#pragma once
+#define VIAL_KEYBOARD_UID {0x46, 0x42, 0xF6, 0xF3, 0x6E, 0xB8, 0x9E, 0xBB}
+#define VIAL_UNLOCK_COMBO_ROWS {0, 0}  
+#define VIAL_UNLOCK_COMBO_COLS {5, 5} 
+
+#define SPLIT_TRANSPORT_MIRROR

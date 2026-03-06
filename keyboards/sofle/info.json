@@ -6,13 +6,15 @@
         "mousekey": true,
         "nkro": true,
         "encoder": true,
-        "oled": true
+        "oled": true,
+        "wpm":true,
+        "rgb_matrix": true
     },
     "build": {
         "lto": true
     },
     "usb": {
-        "vid": "0xFC32"
+        "vid": "0xFEC2"
     },
     "diode_direction": "COL2ROW",
     "qmk": {
@@ -21,7 +23,8 @@
     "split": {
         "enabled": true,
         "serial": {
-            "pin": "D2"
+       "driver": "vendor",
+            "pin": "GP1"
         },
         "transport": {
             "sync": {
@@ -30,7 +33,7 @@
         }
     },
     "ws2812": {
-        "pin": "D3"
+        "pin": "GP0"
     },
     "rgblight": {
         "led_count": 72,
@@ -41,6 +44,51 @@
         "driver": "ws2812",
         "split_count": [36, 36],
         "sleep": true,
+        "animations": {
+            "alphas_mods": true,
+            "gradient_up_down": true,
+            "gradient_left_right": true,
+            "breathing": true,
+            "band_sat": true,
+            "band_val": true,
+            "band_pinwheel_sat": true,
+            "band_pinwheel_val": true,
+            "band_spiral_sat": true,
+            "band_spiral_val": true,
+            "cycle_all": true,
+            "cycle_left_right": true,
+            "cycle_up_down": true,
+            "cycle_out_in": true,
+            "cycle_out_in_dual": true,
+            "rainbow_moving_chevron": true,
+            "cycle_pinwheel": true,
+            "cycle_spiral": true,
+            "dual_beacon": true,
+            "rainbow_beacon": true,
+            "rainbow_pinwheels": true,
+            "raindrops": true,
+            "jellybean_raindrops": true,
+            "hue_breathing": true,
+            "hue_pendulum": true,
+            "hue_wave": true,
+            "pixel_fractal": true,
+            "pixel_flow": true,
+            "pixel_rain": true,
+            "typing_heatmap": true,
+            "digital_rain": true,
+            "solid_reactive_simple": true,
+            "solid_reactive": true,
+            "solid_reactive_wide": true,
+            "solid_reactive_multiwide": true,
+            "solid_reactive_cross": true,
+            "solid_reactive_multicross": true,
+            "solid_reactive_nexus": true,
+            "solid_reactive_multinexus": true,
+            "splash": true,
+            "multisplash": true,
+            "solid_splash": true,
+            "solid_multisplash": true
+        },    
         "layout": [
             {"x": 96, "y": 40, "flags": 8},
             {"x": 16, "y": 20, "flags": 2},
