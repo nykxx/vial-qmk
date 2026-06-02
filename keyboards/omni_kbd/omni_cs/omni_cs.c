@@ -140,6 +140,16 @@ void keyboard_post_init_kb(void) {
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     current_layer = get_highest_layer(layer_state);
+    static bool hscroll = false;
+    if (current_layer == _MARK) {
+        hscroll = true;
+    } else if (current_layer == _MOUSE && hscroll) {
+        // auto mouse layerによってマウスレイヤーに切り替わるので
+        // hscrollフラグが立っている場合そのままにする
+    } else {
+        hscroll = false;
+    }
+
     if(display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
         if (current_layer != pre_layer) {
             swipe_gesture_main_view_update(current_layer);
@@ -179,7 +189,11 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     if (tb_mode_l == TRACKBALL_CURSOR){
         process_cursor_report(&mouse_report, report1, speed_adjust1, slope_factor1, -1, -1, 2);
     } else if (tb_mode_l == TRACKBALL_TAP) {
-        process_high_res_scroll_report(&mouse_report, report1, speed_adjust2, slope_factor2, 1, -1, 3);
+        if (hscroll) {
+            process_high_res_scroll_report(&mouse_report, report1, speed_adjust2, slope_factor2, 1, 0, 3);
+        } else {
+            process_high_res_scroll_report(&mouse_report, report1, speed_adjust2, slope_factor2, 0, -5, 3);
+        }
     }
 
     if (ENABLE_TOUCH_UPDATE == 1) {
