@@ -24,6 +24,7 @@
 #include "../common/status_view.h"
 #include "../common/swipe_gesture.h"
 #include "../common/trackball_tuning.h"
+#include "../common/touch_key_view.h"
 #include "../drivers/pmw33xx_common.h"
 #include "../font/noto9.qff.h"
 #include "../font/noto11.qff.h"
@@ -41,8 +42,6 @@ static bool is_second_frame = true;
 static deferred_token my_anim;
 static uint8_t pre_layer = 0;
 static uint32_t lcd_fast_res_time = 0;
-static const point_t home_point = {TOUCH_LCD_WIDTH / 2, TOUCH_LCD_HEIGHT / 2};
-const point_t circles[] = {{200, 120}, {160, 189}, {80, 189}, {40, 120}, {80, 51}, {160, 51}};
 static uint16_t sleeping_timer;
 static bool sleeping_state = false;
 static uint16_t draw_matrix_code_rain_timer = 0;
@@ -55,7 +54,6 @@ static bool lcd_is_on = true;
 enum {
     LCD_LAYER_COUNT        = MAX_LCD_LAYER + 1,
     LCD_CATEGORY_COUNT     = MAX_LCD_CATEGORY + 1,
-    LCD_KEYS_PER_LAYER     = 6,
     LCD_BACKLIGHT_BLINK_MS = 50,
     STARTUP_ANIMATION_MS   = 3000,
     STARTUP_SETTLE_MS      = 300,
@@ -97,7 +95,7 @@ static void update_touch_feedback(void) {
 
 static void draw_second_frame(void) {
     if (!is_first_frame && is_second_frame) {
-        draw_lcd_layer_category_images();
+        touch_key_view_draw(display);
         qp_flush(display);
         is_second_frame = false;
     }
@@ -170,7 +168,7 @@ static bool process_display_keycode(uint16_t keycode) {
         case KC_DP_TOUCH_KEY:
             display_mode = DISPLAY_MODE_TOUCH_KEY;
             draw_background_all_black();
-            draw_lcd_layer_category_images();
+            touch_key_view_draw(display);
             break;
         case KC_DP_TB_TUNE:
             display_mode = DISPLAY_MODE_TRACKBALL_TUNING;
@@ -181,7 +179,7 @@ static bool process_display_keycode(uint16_t keycode) {
             draw_background_all();
             swipe_gesture_draw_profile(display, noto11_font);
             swipe_gesture_draw_base(display);
-            swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
+            swipe_gesture_draw_main(display, noto11_font, touch_key_view_current_layer());
             break;
         case KC_DP_KEY_MAT:
             display_mode = DISPLAY_MODE_KEY_MATRIX;
@@ -201,7 +199,7 @@ static void refresh_swipe_gesture_view(void) {
     save_omni_color_config();
     draw_background_all();
     swipe_gesture_draw_base(display);
-    swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
+    swipe_gesture_draw_main(display, noto11_font, touch_key_view_current_layer());
     swipe_gesture_draw_profile(display, noto11_font);
 }
 
@@ -248,23 +246,10 @@ static void show_startup_logo(void) {
     }
 }
 
-static void initialize_lcd_layer_app_images(void) {
-    for (int layer = 0; layer < LCD_LAYER_COUNT; layer++) {
-        for (int category = 0; category < LCD_CATEGORY_COUNT; category++) {
-            int layer_index = category + layer * LCD_CATEGORY_COUNT;
-            lcd_layer_app_images[category][layer][0] = (ImagePosition){omni_layer_image_handle(layer_index), home_point.x_coordinate, home_point.y_coordinate};
-            for (int key = 0; key < LCD_KEYS_PER_LAYER; key++) {
-                int key_index = key + category * LCD_KEYS_PER_LAYER + layer * LCD_CATEGORY_COUNT * LCD_KEYS_PER_LAYER;
-                lcd_layer_app_images[category][layer][key + 1] = (ImagePosition){omni_keycode_image_handle(virtual_keycode[key_index]), circles[key].x_coordinate, circles[key].y_coordinate};
-            }
-        }
-    }
-}
-
 static void update_lcd_view_data(void){
     draw_background_all_black();
-    initialize_lcd_layer_app_images();
-    draw_lcd_layer_category_images();
+    touch_key_view_initialize(virtual_keycode);
+    touch_key_view_draw(display);
 }
 
 static void load_virtual_keys(void) {
@@ -290,7 +275,7 @@ void matrix_init_user(void) {
     writePinHigh(BLK_PIN);
     i2c_init();
     setPinInputHigh(INT_PIN); 
-    initialize_lcd_layer_app_images();
+    touch_key_view_initialize(virtual_keycode);
     load_virtual_keys();
 }
 
@@ -390,7 +375,7 @@ void housekeeping_task_user(void) {
             is_first_frame = false;
             qp_stop_animation(my_anim);
             draw_background_all_black();
-            initialize_lcd_layer_app_images();
+            touch_key_view_initialize(virtual_keycode);
         }
     }
     bool matrix_changed = get_last_matrix_state();

@@ -41,5 +41,3 @@ enum custom_keycodes {
     KC_DP_KEY_MAT,
     KC_DP_STAT1,
 };
-
-extern const point_t circles[6];

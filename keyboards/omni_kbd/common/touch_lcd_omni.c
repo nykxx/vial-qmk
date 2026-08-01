@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "trackball_tuning.h"
 #include "touch_input.h"
+#include "touch_key_view.h"
 #include "view_keymap.h"
 #include "status_view.h"
 #include "swipe_gesture.h"
@@ -16,10 +17,7 @@ enum {
 };
 
 painter_device_t display;
-ImagePosition lcd_layer_app_images[MAX_LCD_CATEGORY + 1][MAX_LCD_LAYER + 1][7];
 uint8_t current_layer = 0;
-uint8_t current_lcd_layer = 0;
-uint8_t current_lcd_category = 0;
 painter_font_handle_t noto9_font;
 painter_font_handle_t noto11_font;
 painter_font_handle_t roboto_mono16;
@@ -43,66 +41,6 @@ void draw_background_all_black(void) {
     qp_rect(display, 0, 0, TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, 0, 0, 0, true);  // HSV: H=0, S=0, V=0 (黒色)
 }
 
-void draw_lcd_layer_category_images(void) {
-    ImagePosition *current_images = lcd_layer_app_images[current_lcd_category][current_lcd_layer];
-    int image_count = sizeof(lcd_layer_app_images[current_lcd_category][current_lcd_layer]) / sizeof(lcd_layer_app_images[current_lcd_category][current_lcd_layer][0]);
-    for (int image_index = 0; image_index < image_count; image_index++) {
-        if (*current_images[image_index].image != NULL) {
-            int draw_x = current_images[image_index].x_coordinate - (*current_images[image_index].image)->width / 2;
-            int draw_y = current_images[image_index].y_coordinate - (*current_images[image_index].image)->height / 2;
-            qp_drawimage(display, draw_x, draw_y, *current_images[image_index].image);
-        }
-    }
-    qp_flush(display);
-}
-
-static void update_lcd_layer_category_by_gesture(void) {
-    switch (gesture_id) {
-        case CST816S_SLIDE_RIGHT:
-            if (current_lcd_layer < MAX_LCD_LAYER) {
-                current_lcd_layer++;
-                draw_background_all_black();
-                draw_lcd_layer_category_images();
-            } else {
-                current_lcd_layer = MAX_LCD_LAYER; 
-            }
-            break;
-
-        case CST816S_SLIDE_LEFT:
-            if (current_lcd_layer > 0) {
-                current_lcd_layer--;
-                draw_background_all_black();
-                draw_lcd_layer_category_images();
-            } else {
-                current_lcd_layer = 0; 
-            }
-            break;
-
-        case CST816S_SLIDE_UP:
-            if (current_lcd_category > 0) {
-                current_lcd_category--;
-                draw_background_all_black();
-                draw_lcd_layer_category_images();
-            } else {
-                current_lcd_category = 0;
-            }
-            break;
-
-        case CST816S_SLIDE_DOWN:
-            if (current_lcd_category < MAX_LCD_CATEGORY) {
-                current_lcd_category++;
-                draw_background_all_black();
-                draw_lcd_layer_category_images();
-            } else {
-                current_lcd_category = MAX_LCD_CATEGORY; 
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-    
 static void process_touch(void) {
     touch_signal = true;
     touch_signal_view_update = true;
@@ -140,7 +78,7 @@ static void process_gesture(void){
             touch_y = now_touch_y;
             process_touch();
         } else if (touch_mode == TOUCH_MODE_SWIPE) {
-            update_lcd_layer_category_by_gesture();
+            touch_key_view_handle_gesture(display, gesture_id);
         }
         break;
 
@@ -292,7 +230,7 @@ void display_redraw(void) {
     switch (display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
             draw_background_all_black();
-            draw_lcd_layer_category_images();
+            touch_key_view_draw(display);
             break;
         case DISPLAY_MODE_TRACKBALL_TUNING:
             trackball_tuning_draw(display, noto11_font);
@@ -301,7 +239,7 @@ void display_redraw(void) {
             draw_background_all();
             swipe_gesture_draw_profile(display, noto11_font);
             swipe_gesture_draw_base(display);
-            swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
+            swipe_gesture_draw_main(display, noto11_font, touch_key_view_current_layer());
             break;
         case DISPLAY_MODE_KEY_MATRIX:
             draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);

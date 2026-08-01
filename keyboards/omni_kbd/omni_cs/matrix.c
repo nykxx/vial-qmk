@@ -10,18 +10,15 @@
 #include "debounce.h"
 #include "atomic_util.h"
 #include "omni_cs.h"
-#include <math.h>
 #include "config.h"
 #include "timer.h"
+#include "../common/touch_key_view.h"
 
 static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
 static const pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
 
 enum {
     PHYSICAL_MATRIX_ROWS = MATRIX_ROWS / 2,
-    TOUCH_KEY_COUNT      = 6,
-    TOUCH_KEY_RADIUS     = 30,
-    INVALID_TOUCH_INDEX  = UINT8_MAX,
 };
 
 static void select_row(uint8_t row)
@@ -138,27 +135,13 @@ void matrix_init_custom(void) {
     init_pins();
 }
 
-static int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, const point_t circles[], size_t num_circles, int radius) {
-    for (size_t circle_index = 0; circle_index < num_circles; circle_index++) {
-        int16_t delta_x = touch_x - circles[circle_index].x_coordinate;
-        int16_t delta_y = touch_y - circles[circle_index].y_coordinate;
-        int distance = sqrt(delta_x * delta_x + delta_y * delta_y);
-        if (distance <= radius) {
-            return circle_index;
-        }
-    }
-    return INVALID_TOUCH_INDEX;
-}
-
-
 static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, uint16_t touch_y) {
-    uint8_t touched_index = check_touch_within_radius(touch_x, touch_y, circles, TOUCH_KEY_COUNT, TOUCH_KEY_RADIUS);
-    if (touched_index != INVALID_TOUCH_INDEX) {
-        if (touch_x <= TOUCH_LCD_WIDTH && touch_y <= TOUCH_LCD_HEIGHT) {
-            *row = (uint8_t)current_lcd_category + current_lcd_layer * (MAX_LCD_CATEGORY + 1) + MATRIX_ROWS + 4 ;
-            *col = (uint8_t)touched_index;
-            return true;
-        }
+    uint8_t virtual_row;
+    uint8_t virtual_column;
+    if (touch_key_view_locate_key(touch_x, touch_y, &virtual_row, &virtual_column)) {
+        *row = virtual_row + MATRIX_ROWS + 4;
+        *col = virtual_column;
+        return true;
     }
     *row = 0xFF;
     *col = 0xFF;
