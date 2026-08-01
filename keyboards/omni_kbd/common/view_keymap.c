@@ -8,58 +8,60 @@
 #include "../omni_cs/omni_cs.h"
 
 
-keyboard_layout_t current_layout = KEYBOARD_LAYOUT_JIS;
+keyboard_layout_t current_layout = KEYBOARD_LAYOUT_US;
 
 
 // USは未対応
 const char* get_display_string_us(uint16_t keycode) {
-    // if ((keycode & 0xFF) == KC_NO) return " ";
-    // uint16_t base = keycode;
-    // if (base >= KC_A && base <= KC_Z) {
-    //     static char letter[2];
-    //     letter[0] = 'a' + (base - KC_A);
-    //     letter[1] = '\0';
-    //     return letter;
-    // }
-    // if (base >= KC_1 && base <= KC_9) {
-    //     static const char* nums[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-    //     return nums[base - KC_1];
-    // } else if (base == KC_0) {
-    //     return "0";
-    // }
-    // if (base == KC_SPACE) return " ";
-    // if (base == KC_LSFT) return "S";
-    // if (base == KC_LCTL) return "C";
-    // if (base == KC_LGUI)   return "G";
-    // if (base == KC_LALT)   return "A";
-    // if (base == KC_RSFT) return "S";
-    // if (base == KC_RCTL) return "C";
-    // if (base == KC_RGUI)   return "G";   
-    // if (base == KC_RALT)   return "A";
-    // if (base == KC_ENTER) return "E";
-    // if (base == KC_TAB)   return "T";
-    // if (base == KC_BSPC)  return "B";
-    // if (base == KC_ESC)   return "E";
-    // if (base == KC_MINUS) return "-";
-    // if (base == KC_EQUAL) return "=";
-    // if (base == KC_LBRC)  return "[";
-    // if (base == KC_RBRC)  return "]";
-    // if (base == KC_BSLS)  return "\\";
-    // if (base == KC_SCLN)  return ";";
-    // if (base == KC_QUOT)  return "'";
-    // if (base == KC_COMM)  return ",";
-    // if (base == KC_DOT)   return ".";
-    // if (base == KC_SLSH)  return "/";
-    // if (base == KC_EXLM)  return "!";
-    // if (base == KC_AT)    return "@";
-    // if (base == KC_HASH)  return "#";
-    // if (base == KC_DLR)   return "$";
-    // if (base == KC_PERC)  return "%";
-    // if (base == KC_CIRC)  return "^";
-    // if (base == KC_AMPR)  return "&";
-    // if (base == KC_ASTR)  return "*";
-    // if (base == KC_LPRN)  return "(";
-    // if (base == KC_RPRN)  return ")";
+    if ((keycode & 0xFF) == KC_NO) return " ";
+    uint16_t base = keycode;
+    if (base >= KC_A && base <= KC_Z) {
+        static char letter[2];
+        letter[0] = 'a' + (base - KC_A);
+        letter[1] = '\0';
+        return letter;
+    }
+    static const char* nums[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+    if (base >= KC_1 && base <= KC_9) {
+        return nums[base - KC_1];
+    } else if (base >= KC_P1 && base <= KC_P9) {
+        return nums[base - KC_P1];
+    } else if (base == KC_0 || base == KC_P0) {
+        return "0";
+    }
+    if (base == KC_SPACE) return " ";
+    if (base == KC_LSFT) return "S";
+    if (base == KC_LCTL) return "C";
+    if (base == KC_LGUI)   return "G";
+    if (base == KC_LALT)   return "A";
+    if (base == KC_RSFT) return "S";
+    if (base == KC_RCTL) return "C";
+    if (base == KC_RGUI)   return "G";   
+    if (base == KC_RALT)   return "A";
+    if (base == KC_ENTER) return "E";
+    if (base == KC_TAB)   return "T";
+    if (base == KC_BSPC)  return "B";
+    if (base == KC_ESC)   return "E";
+    if (base == KC_MINUS) return "-";
+    if (base == KC_EQUAL) return "=";
+    if (base == KC_LBRC)  return "[";
+    if (base == KC_RBRC)  return "]";
+    if (base == KC_BSLS)  return "\\";
+    if (base == KC_SCLN)  return ";";
+    if (base == KC_QUOT)  return "'";
+    if (base == KC_COMM)  return ",";
+    if (base == KC_DOT)   return ".";
+    if (base == KC_SLSH)  return "/";
+    if (base == KC_EXLM)  return "!";
+    if (base == KC_AT)    return "@";
+    if (base == KC_HASH)  return "#";
+    if (base == KC_DLR)   return "$";
+    if (base == KC_PERC)  return "%";
+    if (base == KC_CIRC)  return "^";
+    if (base == KC_AMPR)  return "&";
+    if (base == KC_ASTR)  return "*";
+    if (base == KC_LPRN)  return "(";
+    if (base == KC_RPRN)  return ")";
     return "-";
 }
 
