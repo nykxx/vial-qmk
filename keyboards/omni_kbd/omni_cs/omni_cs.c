@@ -150,8 +150,8 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
                 draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
             }            
         } else {
-            if (current_layer !=  _MOUSE) {
-                if (pre_layer !=  _MOUSE) {
+            if (current_layer != _MOUSE) {
+                if (pre_layer != _MOUSE) {
                     if (current_layer != pre_layer) {
                         draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
                     }

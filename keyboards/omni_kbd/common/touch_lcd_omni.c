@@ -176,15 +176,19 @@ void change_swipe_layer(void) {
 
 const char* get_layer_name(uint8_t layer) {
     switch (layer) {
-        case 0:
+        case _BASE:
             return "BASE";
-        case 1:
+        case _SUB:
             return "SUB ";
-        case 2:
-            return "NUM ";
-        case 3:
-            return "SYMB";
-        case 4:
+        case _MARK:
+            return "MARK ";
+        case _FUNC:
+            return "FUNC";
+        case _NUM:
+            return "NUM";
+        case _MOUSE:
+            return "MOUS";
+        case _CUSTOM:
             return "CUST";
         default:
             return "UNKN";
