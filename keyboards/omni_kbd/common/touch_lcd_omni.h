@@ -4,9 +4,6 @@
 #include "config.h"
 #include "config_omni.h"
 
-#define MACRO_KEY_START 0x7700
-#define MACRO_KEY_END   0x77FE
-#define MACRO_KEY_COUNT (MACRO_KEY_END - MACRO_KEY_START + 1)
 #define TOUCH_TIME_MS         70
 #define TOUCH_DEBOUNCE_TIME   (TOUCH_TIME_MS + 80)
 #define TAP_DIST_PX           3
@@ -53,8 +50,6 @@ extern uint8_t gesture_id;
 
 const char *get_layer_name(uint8_t layer);
 
-painter_image_handle_t* get_img_func(uint16_t keycode);
-painter_image_handle_t* get_layer_img_func(uint16_t layer_count);
 void display_redraw(void);
 void draw_background_all(void);
 void draw_background_all_black(void);

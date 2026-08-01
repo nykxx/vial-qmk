@@ -237,10 +237,11 @@ static void show_startup_logo(void) {
     initialize_images();
     qp_flush(display);
 
-    if (image_logo != NULL) {
-        int logo_x_coordinate = (TOUCH_LCD_WIDTH - image_logo->width) / 2;
-        int logo_y_coordinate = (TOUCH_LCD_HEIGHT - image_logo->height) / 2;
-        my_anim = qp_animate(display, logo_x_coordinate, logo_y_coordinate, image_logo);
+    painter_image_handle_t logo_image = omni_logo_image();
+    if (logo_image != NULL) {
+        int logo_x_coordinate = (TOUCH_LCD_WIDTH - logo_image->width) / 2;
+        int logo_y_coordinate = (TOUCH_LCD_HEIGHT - logo_image->height) / 2;
+        my_anim = qp_animate(display, logo_x_coordinate, logo_y_coordinate, logo_image);
         lcd_fast_res_time = timer_read();
     }
 }
@@ -249,10 +250,10 @@ static void initialize_lcd_layer_app_images(void) {
     for (int layer = 0; layer < LCD_LAYER_COUNT; layer++) {
         for (int category = 0; category < LCD_CATEGORY_COUNT; category++) {
             int layer_index = category + layer * LCD_CATEGORY_COUNT;
-            lcd_layer_app_images[category][layer][0] = (ImagePosition){get_layer_img_func(layer_index), home_point.x_coordinate, home_point.y_coordinate};
+            lcd_layer_app_images[category][layer][0] = (ImagePosition){omni_layer_image_handle(layer_index), home_point.x_coordinate, home_point.y_coordinate};
             for (int key = 0; key < LCD_KEYS_PER_LAYER; key++) {
                 int key_index = key + category * LCD_KEYS_PER_LAYER + layer * LCD_CATEGORY_COUNT * LCD_KEYS_PER_LAYER;
-                lcd_layer_app_images[category][layer][key + 1] = (ImagePosition){get_img_func(virtual_keycode[key_index]), circles[key].x_coordinate, circles[key].y_coordinate};
+                lcd_layer_app_images[category][layer][key + 1] = (ImagePosition){omni_keycode_image_handle(virtual_keycode[key_index]), circles[key].x_coordinate, circles[key].y_coordinate};
             }
         }
     }

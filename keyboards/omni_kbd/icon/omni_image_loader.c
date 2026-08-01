@@ -104,112 +104,137 @@
 #include "generated/085.qgf.h"
 #include "generated/086.qgf.h"
 
-painter_image_handle_t image_logo;
-painter_image_handle_t image_save;
-painter_image_handle_t layer_00, layer_01, layer_02, layer_03, layer_04, layer_05, layer_06, layer_07, layer_08, layer_09, layer_10, layer_11;
-painter_image_handle_t image_000, image_001, image_002, image_003, image_004, image_005, image_006, image_007, image_008, image_009, image_010, image_011, image_012, image_013, image_014, image_015, image_016, image_017, image_018, image_019, image_020, image_021, image_022, image_023, image_024, image_025, image_026, image_027, image_028, image_029, image_030, image_031, image_032, image_033, image_034, image_035, image_036, image_037, image_038, image_039, image_040, image_041, image_042, image_043, image_044, image_045, image_046, image_047, image_048, image_049, image_050, image_051, image_052, image_053, image_054, image_055, image_056, image_057, image_058, image_059, image_060, image_061, image_062, image_063, image_064, image_065, image_066, image_067, image_068, image_069, image_070, image_071, image_072, image_073, image_074, image_075, image_076, image_077, image_078, image_079, image_080, image_081, image_082, image_083, image_084, image_085, image_086, image_087, image_088, image_089, image_090, image_091, image_092, image_093, image_094, image_095, image_096, image_097, image_098, image_099, image_100, image_101, image_102, image_103, image_104, image_105, image_106, image_107, image_108, image_109, image_110, image_111, image_112, image_113, image_114, image_115, image_116, image_117, image_118, image_119, image_120, image_121, image_122, image_123, image_124, image_125, image_126, image_127, image_128, image_129, image_130, image_131, image_132, image_133, image_134, image_135, image_136, image_137, image_138, image_139, image_140, image_141, image_142, image_143, image_144, image_145, image_146, image_147, image_148, image_149, image_150, image_151, image_152, image_153, image_154, image_155, image_156, image_157, image_158, image_159, image_160, image_161, image_162, image_163, image_164, image_165, image_166, image_167, image_168, image_169, image_170, image_171, image_172, image_173, image_174, image_175, image_176, image_177, image_178, image_179, image_180, image_181, image_182, image_183, image_184, image_185, image_186, image_187, image_188, image_189, image_190, image_191, image_192, image_193, image_194, image_195, image_196, image_197, image_198, image_199, image_200, image_201, image_202, image_203, image_204, image_205, image_206, image_207, image_208, image_209, image_210, image_211, image_212, image_213, image_214, image_215, image_216, image_217, image_218, image_219, image_220, image_221, image_222, image_223, image_224, image_225, image_226, image_227, image_228, image_229, image_230, image_231, image_232, image_233, image_234, image_235, image_236, image_237, image_238, image_239, image_240, image_241, image_242, image_243, image_244, image_245, image_246, image_247, image_248, image_249, image_250, image_251, image_252, image_253, image_254;
+enum {
+    LAYER_IMAGE_COUNT = 12,
+    MACRO_KEY_START   = 0x7700,
+    MACRO_KEY_END     = 0x77FE,
+    MACRO_KEY_COUNT   = MACRO_KEY_END - MACRO_KEY_START + 1,
+};
 
-// 初期化関数の実装
+static painter_image_handle_t logo_image;
+static painter_image_handle_t save_image;
+static painter_image_handle_t layer_images[LAYER_IMAGE_COUNT];
+static painter_image_handle_t keycode_images[MACRO_KEY_COUNT];
+
 void initialize_images(void) {
-    image_logo = qp_load_image_mem(gfx_omni_logo);
-    image_save = qp_load_image_mem(gfx_save);
-    layer_00 = qp_load_image_mem(gfx_layer_00);
-    layer_01 = qp_load_image_mem(gfx_layer_01);
-    layer_02 = qp_load_image_mem(gfx_layer_02);
-    layer_03 = qp_load_image_mem(gfx_layer_03);
-    layer_04 = qp_load_image_mem(gfx_layer_04);
-    layer_05 = qp_load_image_mem(gfx_layer_05);
-    layer_06 = qp_load_image_mem(gfx_layer_06);
-    layer_07 = qp_load_image_mem(gfx_layer_07);
-    layer_08 = qp_load_image_mem(gfx_layer_08);
-    layer_09 = qp_load_image_mem(gfx_layer_09);
-    layer_10 = qp_load_image_mem(gfx_layer_10);
-    layer_11 = qp_load_image_mem(gfx_layer_11);
-    image_000 = qp_load_image_mem(gfx_000);
-    image_001 = qp_load_image_mem(gfx_001);
-    image_002 = qp_load_image_mem(gfx_002);
-    image_003 = qp_load_image_mem(gfx_003);
-    image_004 = qp_load_image_mem(gfx_004);
-    image_005 = qp_load_image_mem(gfx_005);
-    image_006 = qp_load_image_mem(gfx_006);
-    image_007 = qp_load_image_mem(gfx_007);
-    image_008 = qp_load_image_mem(gfx_008);
-    image_009 = qp_load_image_mem(gfx_009);
-    image_010 = qp_load_image_mem(gfx_010);
-    image_011 = qp_load_image_mem(gfx_011);
-    image_012 = qp_load_image_mem(gfx_012);
-    image_013 = qp_load_image_mem(gfx_013);
-    image_014 = qp_load_image_mem(gfx_014);
-    image_015 = qp_load_image_mem(gfx_015);
-    image_016 = qp_load_image_mem(gfx_016);
-    image_017 = qp_load_image_mem(gfx_017);
-    image_018 = qp_load_image_mem(gfx_018);
-    image_019 = qp_load_image_mem(gfx_019);
-    image_020 = qp_load_image_mem(gfx_020);
-    image_021 = qp_load_image_mem(gfx_021);
-    image_022 = qp_load_image_mem(gfx_022);
-    image_023 = qp_load_image_mem(gfx_023);
-    image_024 = qp_load_image_mem(gfx_024);
-    image_025 = qp_load_image_mem(gfx_025);
-    image_026 = qp_load_image_mem(gfx_026);
-    image_027 = qp_load_image_mem(gfx_027);
-    image_028 = qp_load_image_mem(gfx_028);
-    image_029 = qp_load_image_mem(gfx_029);
-    image_030 = qp_load_image_mem(gfx_030);
-    image_031 = qp_load_image_mem(gfx_031);
-    image_032 = qp_load_image_mem(gfx_032);
-    image_033 = qp_load_image_mem(gfx_033);
-    image_034 = qp_load_image_mem(gfx_034);
-    image_035 = qp_load_image_mem(gfx_035);
-    image_036 = qp_load_image_mem(gfx_036);
-    image_037 = qp_load_image_mem(gfx_037);
-    image_038 = qp_load_image_mem(gfx_038);
-    image_039 = qp_load_image_mem(gfx_039);
-    image_040 = qp_load_image_mem(gfx_040);
-    image_041 = qp_load_image_mem(gfx_041);
-    image_042 = qp_load_image_mem(gfx_042);
-    image_043 = qp_load_image_mem(gfx_043);
-    image_044 = qp_load_image_mem(gfx_044);
-    image_045 = qp_load_image_mem(gfx_045);
-    image_046 = qp_load_image_mem(gfx_046);
-    image_047 = qp_load_image_mem(gfx_047);
-    image_048 = qp_load_image_mem(gfx_048);
-    image_049 = qp_load_image_mem(gfx_049);
-    image_050 = qp_load_image_mem(gfx_050);
-    image_051 = qp_load_image_mem(gfx_051);
-    image_052 = qp_load_image_mem(gfx_052);
-    image_053 = qp_load_image_mem(gfx_053);
-    image_054 = qp_load_image_mem(gfx_054);
-    image_055 = qp_load_image_mem(gfx_055);
-    image_056 = qp_load_image_mem(gfx_056);
-    image_057 = qp_load_image_mem(gfx_057);
-    image_058 = qp_load_image_mem(gfx_058);
-    image_059 = qp_load_image_mem(gfx_059);
-    image_060 = qp_load_image_mem(gfx_060);
-    image_061 = qp_load_image_mem(gfx_061);
-    image_062 = qp_load_image_mem(gfx_062);
-    image_063 = qp_load_image_mem(gfx_063);
-    image_064 = qp_load_image_mem(gfx_064);
-    image_065 = qp_load_image_mem(gfx_065);
-    image_066 = qp_load_image_mem(gfx_066);
-    image_067 = qp_load_image_mem(gfx_067);
-    image_068 = qp_load_image_mem(gfx_068);
-    image_069 = qp_load_image_mem(gfx_069);
-    image_070 = qp_load_image_mem(gfx_070);
-    image_071 = qp_load_image_mem(gfx_071);
-    image_072 = qp_load_image_mem(gfx_072);
-    image_073 = qp_load_image_mem(gfx_073);
-    image_074 = qp_load_image_mem(gfx_074);
-    image_075 = qp_load_image_mem(gfx_075);
-    image_076 = qp_load_image_mem(gfx_076);
-    image_077 = qp_load_image_mem(gfx_077);
-    image_078 = qp_load_image_mem(gfx_078);
-    image_079 = qp_load_image_mem(gfx_079);
-    image_080 = qp_load_image_mem(gfx_080);
-    image_081 = qp_load_image_mem(gfx_081);
-    image_082 = qp_load_image_mem(gfx_082);
-    image_083 = qp_load_image_mem(gfx_083);
-    image_084 = qp_load_image_mem(gfx_084);
-    image_085 = qp_load_image_mem(gfx_085);
-    image_086 = qp_load_image_mem(gfx_086);
+    logo_image = qp_load_image_mem(gfx_omni_logo);
+    save_image = qp_load_image_mem(gfx_save);
+    layer_images[0] = qp_load_image_mem(gfx_layer_00);
+    layer_images[1] = qp_load_image_mem(gfx_layer_01);
+    layer_images[2] = qp_load_image_mem(gfx_layer_02);
+    layer_images[3] = qp_load_image_mem(gfx_layer_03);
+    layer_images[4] = qp_load_image_mem(gfx_layer_04);
+    layer_images[5] = qp_load_image_mem(gfx_layer_05);
+    layer_images[6] = qp_load_image_mem(gfx_layer_06);
+    layer_images[7] = qp_load_image_mem(gfx_layer_07);
+    layer_images[8] = qp_load_image_mem(gfx_layer_08);
+    layer_images[9] = qp_load_image_mem(gfx_layer_09);
+    layer_images[10] = qp_load_image_mem(gfx_layer_10);
+    layer_images[11] = qp_load_image_mem(gfx_layer_11);
+    keycode_images[0] = qp_load_image_mem(gfx_000);
+    keycode_images[1] = qp_load_image_mem(gfx_001);
+    keycode_images[2] = qp_load_image_mem(gfx_002);
+    keycode_images[3] = qp_load_image_mem(gfx_003);
+    keycode_images[4] = qp_load_image_mem(gfx_004);
+    keycode_images[5] = qp_load_image_mem(gfx_005);
+    keycode_images[6] = qp_load_image_mem(gfx_006);
+    keycode_images[7] = qp_load_image_mem(gfx_007);
+    keycode_images[8] = qp_load_image_mem(gfx_008);
+    keycode_images[9] = qp_load_image_mem(gfx_009);
+    keycode_images[10] = qp_load_image_mem(gfx_010);
+    keycode_images[11] = qp_load_image_mem(gfx_011);
+    keycode_images[12] = qp_load_image_mem(gfx_012);
+    keycode_images[13] = qp_load_image_mem(gfx_013);
+    keycode_images[14] = qp_load_image_mem(gfx_014);
+    keycode_images[15] = qp_load_image_mem(gfx_015);
+    keycode_images[16] = qp_load_image_mem(gfx_016);
+    keycode_images[17] = qp_load_image_mem(gfx_017);
+    keycode_images[18] = qp_load_image_mem(gfx_018);
+    keycode_images[19] = qp_load_image_mem(gfx_019);
+    keycode_images[20] = qp_load_image_mem(gfx_020);
+    keycode_images[21] = qp_load_image_mem(gfx_021);
+    keycode_images[22] = qp_load_image_mem(gfx_022);
+    keycode_images[23] = qp_load_image_mem(gfx_023);
+    keycode_images[24] = qp_load_image_mem(gfx_024);
+    keycode_images[25] = qp_load_image_mem(gfx_025);
+    keycode_images[26] = qp_load_image_mem(gfx_026);
+    keycode_images[27] = qp_load_image_mem(gfx_027);
+    keycode_images[28] = qp_load_image_mem(gfx_028);
+    keycode_images[29] = qp_load_image_mem(gfx_029);
+    keycode_images[30] = qp_load_image_mem(gfx_030);
+    keycode_images[31] = qp_load_image_mem(gfx_031);
+    keycode_images[32] = qp_load_image_mem(gfx_032);
+    keycode_images[33] = qp_load_image_mem(gfx_033);
+    keycode_images[34] = qp_load_image_mem(gfx_034);
+    keycode_images[35] = qp_load_image_mem(gfx_035);
+    keycode_images[36] = qp_load_image_mem(gfx_036);
+    keycode_images[37] = qp_load_image_mem(gfx_037);
+    keycode_images[38] = qp_load_image_mem(gfx_038);
+    keycode_images[39] = qp_load_image_mem(gfx_039);
+    keycode_images[40] = qp_load_image_mem(gfx_040);
+    keycode_images[41] = qp_load_image_mem(gfx_041);
+    keycode_images[42] = qp_load_image_mem(gfx_042);
+    keycode_images[43] = qp_load_image_mem(gfx_043);
+    keycode_images[44] = qp_load_image_mem(gfx_044);
+    keycode_images[45] = qp_load_image_mem(gfx_045);
+    keycode_images[46] = qp_load_image_mem(gfx_046);
+    keycode_images[47] = qp_load_image_mem(gfx_047);
+    keycode_images[48] = qp_load_image_mem(gfx_048);
+    keycode_images[49] = qp_load_image_mem(gfx_049);
+    keycode_images[50] = qp_load_image_mem(gfx_050);
+    keycode_images[51] = qp_load_image_mem(gfx_051);
+    keycode_images[52] = qp_load_image_mem(gfx_052);
+    keycode_images[53] = qp_load_image_mem(gfx_053);
+    keycode_images[54] = qp_load_image_mem(gfx_054);
+    keycode_images[55] = qp_load_image_mem(gfx_055);
+    keycode_images[56] = qp_load_image_mem(gfx_056);
+    keycode_images[57] = qp_load_image_mem(gfx_057);
+    keycode_images[58] = qp_load_image_mem(gfx_058);
+    keycode_images[59] = qp_load_image_mem(gfx_059);
+    keycode_images[60] = qp_load_image_mem(gfx_060);
+    keycode_images[61] = qp_load_image_mem(gfx_061);
+    keycode_images[62] = qp_load_image_mem(gfx_062);
+    keycode_images[63] = qp_load_image_mem(gfx_063);
+    keycode_images[64] = qp_load_image_mem(gfx_064);
+    keycode_images[65] = qp_load_image_mem(gfx_065);
+    keycode_images[66] = qp_load_image_mem(gfx_066);
+    keycode_images[67] = qp_load_image_mem(gfx_067);
+    keycode_images[68] = qp_load_image_mem(gfx_068);
+    keycode_images[69] = qp_load_image_mem(gfx_069);
+    keycode_images[70] = qp_load_image_mem(gfx_070);
+    keycode_images[71] = qp_load_image_mem(gfx_071);
+    keycode_images[72] = qp_load_image_mem(gfx_072);
+    keycode_images[73] = qp_load_image_mem(gfx_073);
+    keycode_images[74] = qp_load_image_mem(gfx_074);
+    keycode_images[75] = qp_load_image_mem(gfx_075);
+    keycode_images[76] = qp_load_image_mem(gfx_076);
+    keycode_images[77] = qp_load_image_mem(gfx_077);
+    keycode_images[78] = qp_load_image_mem(gfx_078);
+    keycode_images[79] = qp_load_image_mem(gfx_079);
+    keycode_images[80] = qp_load_image_mem(gfx_080);
+    keycode_images[81] = qp_load_image_mem(gfx_081);
+    keycode_images[82] = qp_load_image_mem(gfx_082);
+    keycode_images[83] = qp_load_image_mem(gfx_083);
+    keycode_images[84] = qp_load_image_mem(gfx_084);
+    keycode_images[85] = qp_load_image_mem(gfx_085);
+    keycode_images[86] = qp_load_image_mem(gfx_086);
+}
+
+painter_image_handle_t omni_logo_image(void) {
+    return logo_image;
+}
+
+painter_image_handle_t omni_save_image(void) {
+    return save_image;
+}
+
+painter_image_handle_t *omni_layer_image_handle(uint16_t layer_index) {
+    return &layer_images[layer_index];
+}
+
+painter_image_handle_t *omni_keycode_image_handle(uint16_t keycode) {
+    if (keycode >= MACRO_KEY_START && keycode <= MACRO_KEY_END) {
+        return &keycode_images[keycode - MACRO_KEY_START];
+    }
+    return &keycode_images[1];
 }
