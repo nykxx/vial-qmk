@@ -8,6 +8,7 @@
 #include "qp_comms.h"
 #include "qp_draw.h"
 #include "qgf.h"
+#include "qp.h"
 
 static inline int16_t constrain_hid(int16_t value) {
     if (value > MAX_HID_VALUE) return MAX_HID_VALUE;
@@ -63,10 +64,7 @@ bool qp_curve(painter_device_t device, float speed_adjust, int slope_factor, uin
 #define DEG_TO_RAD(angle) ((angle) * M_PI / 180.0)
 #define ANGLE_STEP 1 
 
-bool qp_fill_arc(painter_device_t device, uint16_t centerx, uint16_t centery,
-                 uint16_t outer_radius, uint16_t inner_radius,
-                 uint16_t start_angle, uint16_t end_angle,
-                 uint8_t hue, uint8_t sat, uint8_t val) {
+bool qp_fill_arc(painter_device_t device, uint16_t centerx, uint16_t centery, uint16_t outer_radius, uint16_t inner_radius, uint16_t start_angle, uint16_t end_angle, uint8_t hue, uint8_t sat, uint8_t val) {
     if (outer_radius <= inner_radius) {
         return false; 
     }
@@ -106,6 +104,150 @@ void qp_donut(painter_device_t device, uint16_t x, uint16_t y, uint16_t radius, 
     for (size_t i = 0; i < thickness; i++) {
         qp_circle(device, x, y, radius - i, hue, sat, val1, false);
         val1 = (val1 + add_val < 0) ? 0 : val1 + add_val;
-
     }
+}
+
+
+
+static uint16_t isqrt_u32(uint32_t n) {
+    uint32_t res = 0, bit = 1UL << 30;
+    while (bit > n) bit >>= 2;
+    while (bit) {
+        if (n >= res + bit) { n -= res + bit; res = (res >> 1) + bit; }
+        else                { res >>= 1; }
+        bit >>= 2;
+    }
+    return (uint16_t)res;
+}
+
+static bool rr_filled(painter_device_t d,
+                      uint16_t l, uint16_t t,
+                      uint16_t r, uint16_t b,
+                      uint16_t rad)
+{
+    uint16_t h = b - t + 1;
+
+    for (uint16_t row = 0; row < h; row++) {
+        uint16_t y = t + row;
+        uint16_t dx;
+
+        if (row < rad) {
+            uint16_t dy = rad - row;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else if (row >= h - rad) {
+            uint16_t dy = row - (h - rad) + 1;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else {
+            dx = 0;
+        }
+
+        uint16_t xl = l + dx;
+        uint16_t xr = r - dx;
+        if (!qp_internal_fillrect_helper_impl(d, xl, y, xr, y))
+            return false;
+    }
+    return true;
+}
+
+static bool rr_outline(painter_device_t d,
+                       uint16_t l, uint16_t t,
+                       uint16_t r, uint16_t b,
+                       uint16_t rad)
+{
+    uint16_t h = b - t + 1;
+
+    for (uint16_t row = 0; row < h; row++) {
+        uint16_t y  = t + row;
+        uint16_t dx;
+
+        if (row < rad) {
+            uint16_t dy = rad - row;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else if (row >= h - rad) {
+            uint16_t dy = row - (h - rad) + 1;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else {
+            dx = 0;
+        }
+
+        uint16_t xl = l + dx;
+        uint16_t xr = r - dx;
+
+        if (row == 0 || row == h - 1) {
+            if (!qp_internal_fillrect_helper_impl(d, xl, y, xr, y))
+                return false;
+        } else {
+            if (!qp_internal_fillrect_helper_impl(d, xl, y, xl, y) ||
+                !qp_internal_fillrect_helper_impl(d, xr, y, xr, y))
+                return false;
+        }
+    }
+    return true;
+}
+
+static bool rr_outline_w(painter_device_t d, uint16_t l, uint16_t t, uint16_t r, uint16_t b, uint16_t rad, uint8_t  thick) {
+    uint16_t h = b - t + 1;
+
+    for (uint16_t row = 0; row < h; row++) {
+        uint16_t y = t + row;
+        uint16_t dx;
+
+        if (row < rad) {
+            uint16_t dy = rad - row;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else if (row >= h - rad) {
+            uint16_t dy = row - (h - rad) + 1;
+            dx = rad - isqrt_u32(rad*rad - dy*dy);
+        } else {
+            dx = 0;
+        }
+
+        for (uint8_t w = 0; w < thick; w++) {
+            uint16_t xl = l + dx + w;
+            uint16_t xr = r - dx - w;
+
+            if (row <= thick || row >= h - 1 - thick) {
+                if (!qp_internal_fillrect_helper_impl(d, xl, y, xr, y))
+                    return false;
+            } else {
+                if (!qp_internal_fillrect_helper_impl(d, xl, y, xl, y) ||
+                    !qp_internal_fillrect_helper_impl(d, xr, y, xr, y))
+                    return false;
+            }
+        }
+    }
+    return true;
+}
+
+/* ────────── PUBLIC API ────────── */
+bool qp_round_rect(painter_device_t dev,
+                   uint16_t left,  uint16_t top,
+                   uint16_t right, uint16_t bottom,
+                   uint16_t radius,
+                   uint8_t hue, uint8_t sat, uint8_t val,
+                   bool filled,
+                   uint8_t stroke_w)
+{
+    uint16_t l = QP_MIN(left,  right);
+    uint16_t r = QP_MAX(left,  right);
+    uint16_t t = QP_MIN(top,   bottom);
+    uint16_t b = QP_MAX(top,   bottom);
+    uint16_t w = r - l + 1, h = b - t + 1;
+    radius = QP_MIN(radius, QP_MIN(w, h) / 2);
+
+    qp_internal_fill_pixdata(dev, w, hue, sat, val);
+
+    if (!qp_comms_start(dev)) return false;
+
+    bool ok;
+    if (filled) {
+        ok = rr_filled(dev, l, t, r, b, radius);
+    } else if (stroke_w <= 1) {
+        ok = rr_outline(dev, l, t, r, b, radius);
+    } else {
+        ok = rr_outline_w(dev, l, t, r, b, radius, stroke_w);
+    }
+
+    qp_comms_stop(dev);
+    return ok;
 }

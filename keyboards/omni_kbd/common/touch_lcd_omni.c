@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "draw_custom.h"
 #include "view_keymap.h"
+#include "status_view.h"
 #include "../drivers/cst816t.h"
 #include "../icon/omni_image_loader.h"
 
@@ -14,6 +15,7 @@ ImagePosition lcd_layer_app_images[MAX_LCD_CATEGORY + 1][MAX_LCD_LAYER + 1][7];
 uint8_t current_layer = 0;
 uint8_t current_lcd_layer = 0;
 uint8_t current_lcd_category = 0;
+painter_font_handle_t noto9_font;
 painter_font_handle_t noto11_font;
 painter_font_handle_t roboto_mono16;
 painter_font_handle_t st2_mono16;
@@ -34,16 +36,16 @@ painter_image_handle_t layer_00, layer_01, layer_02, layer_03, layer_04, layer_0
 painter_image_handle_t image_000, image_001, image_002, image_003, image_004, image_005, image_006, image_007, image_008, image_009, image_010, image_011, image_012, image_013, image_014, image_015, image_016, image_017, image_018, image_019, image_020, image_021, image_022, image_023, image_024, image_025, image_026, image_027, image_028, image_029, image_030, image_031, image_032, image_033, image_034, image_035, image_036, image_037, image_038, image_039, image_040, image_041, image_042, image_043, image_044, image_045, image_046, image_047, image_048, image_049, image_050, image_051, image_052, image_053, image_054, image_055, image_056, image_057, image_058, image_059, image_060, image_061, image_062, image_063, image_064, image_065, image_066, image_067, image_068, image_069, image_070, image_071, image_072, image_073, image_074, image_075, image_076, image_077, image_078, image_079, image_080, image_081, image_082, image_083, image_084, image_085, image_086, image_087, image_088, image_089, image_090, image_091, image_092, image_093, image_094, image_095, image_096, image_097, image_098, image_099, image_100, image_101, image_102, image_103, image_104, image_105, image_106, image_107, image_108, image_109, image_110, image_111, image_112, image_113, image_114, image_115, image_116, image_117, image_118, image_119, image_120, image_121, image_122, image_123, image_124, image_125, image_126, image_127, image_128, image_129, image_130, image_131, image_132, image_133, image_134, image_135, image_136, image_137, image_138, image_139, image_140, image_141, image_142, image_143, image_144, image_145, image_146, image_147, image_148, image_149, image_150, image_151, image_152, image_153, image_154, image_155, image_156, image_157, image_158, image_159, image_160, image_161, image_162, image_163, image_164, image_165, image_166, image_167, image_168, image_169, image_170, image_171, image_172, image_173, image_174, image_175, image_176, image_177, image_178, image_179, image_180, image_181, image_182, image_183, image_184, image_185, image_186, image_187, image_188, image_189, image_190, image_191, image_192, image_193, image_194, image_195, image_196, image_197, image_198, image_199, image_200, image_201, image_202, image_203, image_204, image_205, image_206, image_207, image_208, image_209, image_210, image_211, image_212, image_213, image_214, image_215, image_216, image_217, image_218, image_219, image_220, image_221, image_222, image_223, image_224, image_225, image_226, image_227, image_228, image_229, image_230, image_231, image_232, image_233, image_234, image_235, image_236, image_237, image_238, image_239, image_240, image_241, image_242, image_243, image_244, image_245, image_246, image_247, image_248, image_249, image_250, image_251, image_252, image_253, image_254;
 uint8_t touch_data[6];
 ImagePosition images[7];
-static uint16_t last_touch_time = 0;
+// static uint16_t last_touch_time = 0;
 static uint16_t last_tap_time = 0;
-static uint16_t initial_touch_timer = 0;
-static uint16_t repeat_touch_timer = 0;
-static uint16_t pre_touch_x;
-static uint16_t pre_touch_y;
-static uint16_t single_touch_x;
-static uint16_t single_touch_y;
-static bool single_click_flag = false;
-static bool touch_repeat_flag = false;
+// static uint16_t initial_touch_timer = 0;
+// static uint16_t repeat_touch_timer = 0;
+// static uint16_t pre_touch_x;
+// static uint16_t pre_touch_y;
+// static uint16_t single_touch_x;
+// static uint16_t single_touch_y;
+// static bool single_click_flag = false;
+// static bool touch_repeat_flag = false;
 static int swipe_layer = 0;
 static bool prev_pin = 1;
 static uint16_t fall_time = 0;
@@ -177,10 +179,12 @@ const char* get_layer_name(uint8_t layer) {
         case 0:
             return "BASE";
         case 1:
-            return "NUM ";
+            return "SUB ";
         case 2:
-            return "SYMB";
+            return "NUM ";
         case 3:
+            return "SYMB";
+        case 4:
             return "CUST";
         default:
             return "UNKN";
@@ -359,69 +363,6 @@ void process_touch(void) {
     touch_signal_view_update = true;
 }
 
-uint8_t classify_gesture(uint16_t x_start, uint16_t y_start, uint16_t x_last,  uint16_t y_last){
-    uint16_t dx = (x_last > x_start) ? (x_last - x_start) : (x_start - x_last);
-    uint16_t dy = (y_last > y_start) ? (y_last - y_start) : (y_start - y_last);
-
-    if (dx < TAP_DIST_PX && dy < TAP_DIST_PX) {
-        return CST816S_CLICK;
-    }
-
-    if (gesture_id == CST816S_SLIDE_LEFT || gesture_id == CST816S_SLIDE_RIGHT || gesture_id == CST816S_SLIDE_UP || gesture_id == CST816S_SLIDE_DOWN) {
-        return gesture_id;
-    }
-
-    
-    if (dx > dy && dx > SWIPE_DIST_PX) {
-        return (x_last > x_start) ? CST816S_SLIDE_LEFT : CST816S_SLIDE_RIGHT;
-    }
-        if (dy > SWIPE_DIST_PX) {
-        return (y_last > y_start) ? CST816S_SLIDE_UP : CST816S_SLIDE_DOWN;
-    }
-
-    return GESTURE_NONE;
-}
-
-void process_gesture(cst816t_XY touch_data) {
-    // uprintf("x,y: %d, %d\n", touch_data.x_point, touch_data.y_point); 
-
-    if (gesture_id == CST816S_SLIDE_UP || gesture_id == CST816S_SLIDE_DOWN || gesture_id == CST816S_SLIDE_LEFT || gesture_id == CST816S_SLIDE_RIGHT) {
-        if (display_mode == DISPLAY_MODE_TOUCH_KEY) {
-            update_lcd_layer_category_by_gesture();
-        } else if (display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
-            swipe_gesture_process();
-        }
-    } else if (gesture_id == CST816S_CLICK) {
-
-        switch (display_mode) {
-            case DISPLAY_MODE_TOUCH_KEY:
-                if (!initial_touch_flag) {
-                    initial_touch_timer = timer_read();
-                    initial_touch_flag = true;
-                    process_touch();
-                } else if (timer_elapsed(initial_touch_timer) > initial_touch_time) {
-                    if (timer_elapsed(repeat_touch_timer) > TOUCH_TIME_MS) {
-                        repeat_touch_timer = timer_read();
-                        process_touch();
-                    }
-                }
-                
-                break;
-
-            case DISPLAY_MODE_TRACKBALL_TUNING:
-                if (timer_elapsed(last_touch_time) > TOUCH_DEBOUNCE_TIME) {
-                    last_touch_time = timer_read();
-                    process_touch_trackball_tuning_mode(touch_x, touch_y);
-                }
-                break;
-
-            default:
-                break;
-
-        }
-    } 
-}
-
 void measure_pulse(uint8_t interrupt_pin) {
     bool curr_pin = interrupt_pin;
     if (prev_pin && !curr_pin) {
@@ -437,53 +378,232 @@ void measure_pulse(uint8_t interrupt_pin) {
     prev_pin = curr_pin;
 }
 
-void process_touch_interrupt(void) {
-    uint8_t interrupt_pin = readPin(INT_PIN);
-    // measure_pulse(interrupt_pin);
-    
-    if (interrupt_pin == 0) {
-        
-        if(!touch_start_flag) {
-            touch_start_timer = timer_read();
-            touch_start_flag = true;
-            single_click_flag = false;
-            touch_repeat_flag = false;
 
+#include "hardware/gpio.h"
+
+#define SAMPLE_MS       1
+#define WINDOW_SLOTS    100
+
+static uint8_t  buf[WINDOW_SLOTS];
+static uint8_t  idx = 0;
+static uint8_t  count_low = 0;
+
+static bool     slot_low_seen = false;
+static uint16_t slot_t0 = 0;
+
+typedef struct {
+  bool in_contact;
+} touch_fsm_t;
+static touch_fsm_t T;
+
+typedef enum {
+    TOUCH_MODE_NONE = 0,
+    TOUCH_MODE_PRESS,
+    TOUCH_MODE_SWIPE
+} touch_mode_t;
+static touch_mode_t touch_mode = TOUCH_MODE_NONE;
+
+typedef enum {
+    TOUCH_STATE_NONE = 0,
+    TOUCH_STATE_START,
+    TOUCH_STATE_WAIT,
+    TOUCH_STATE_REPEAT,
+    TOUCH_STATE_SINGLE
+} touch_state_t;
+static touch_state_t touch_state = TOUCH_STATE_NONE;
+
+static inline void touch_irq_init(void) {
+    setPinInputHigh(INT_PIN);
+    gpio_set_irq_enabled(INT_PIN, GPIO_IRQ_EDGE_FALL, true);
+}
+
+void touch_buf_init(void) {
+    for (int i = 0; i < WINDOW_SLOTS; i++) buf[i] = 0;
+    idx = 0;
+    count_low = 0;
+    T.in_contact = false;
+    slot_low_seen = false;
+    slot_t0 = timer_read();
+}
+
+void touch_buf_tick(void) {
+    if (gpio_get_irq_event_mask(INT_PIN) & GPIO_IRQ_EDGE_FALL) {
+        slot_low_seen = true;
+        gpio_acknowledge_irq(INT_PIN, GPIO_IRQ_EDGE_FALL);
+    }
+
+    while (timer_elapsed(slot_t0) >= SAMPLE_MS) {
+        uint8_t v = slot_low_seen ? 1 : 0;
+        count_low += v; count_low -= buf[idx];
+        buf[idx] = v;
+        if (++idx >= WINDOW_SLOTS) idx = 0;
+
+        slot_t0 += SAMPLE_MS;
+        slot_low_seen = false;
+
+        if (!T.in_contact) {
+            if (count_low >= 1) { 
+                T.in_contact = true; 
+                // uprintf("[TOUCH] DOWN (count=%u)\n", count_low); 
+            }
+        } else {
+            if (count_low == 0) { 
+                T.in_contact = false; 
+                // uprintf("[TOUCH] UP   (count=%u)\n", count_low); 
+            }
+        }
+    }
+}
+
+ 
+bool touch_buf_init_flag = false;
+static uint16_t fast_touch_time = 0;
+static uint16_t second_touch_time = 0;
+static uint16_t touch_repeat_time = 0;
+static uint16_t pre_touch_x;
+static uint16_t pre_touch_y;
+static uint16_t now_touch_x;
+static uint16_t now_touch_y;
+
+void process_gesture(void){
+    switch (display_mode) {    
+    case DISPLAY_MODE_TOUCH_KEY:
+        if (touch_mode == TOUCH_MODE_PRESS) {
+            touch_x = now_touch_x;
+            touch_y = now_touch_y;
+            process_touch();
+        } else if (touch_mode == TOUCH_MODE_SWIPE) {
+            update_lcd_layer_category_by_gesture();
+        }
+        break;
+
+    case DISPLAY_MODE_TRACKBALL_TUNING:
+        process_touch_trackball_tuning_mode(now_touch_x, now_touch_y);
+        break;
+
+    case DISPLAY_MODE_SWIPE_GESTURE:
+        swipe_gesture_process();
+        break;   
+
+    case DISPLAY_MODE_STATUS1:
+        ui_handle_touch(display, noto9_font, now_touch_x, now_touch_y);
+        break;                    
+
+    default:
+        break;
+    }
+}
+
+void touch_mode_detected(int16_t x, int16_t y){
+    if (x == 0 && y == 0) {
+        touch_mode = TOUCH_MODE_PRESS;
+    } else {
+        touch_mode = TOUCH_MODE_SWIPE;
+    }
+}
+
+void swipe_gesture_id_detected(int16_t x, int16_t y){
+    int16_t ax = x; 
+    if (ax < 0) ax = -ax;
+    int16_t ay = y; 
+    if (ay < 0) ay = -ay;
+    gesture_id = GESTURE_NONE;  
+    if (ax > ay) {
+        if (x > 0) {
+            gesture_id = CST816S_SLIDE_RIGHT;
+        } else if (x < 0) {
+            gesture_id = CST816S_SLIDE_LEFT;
+        }
+    } else {
+        if (y > 0) {
+            gesture_id = CST816S_SLIDE_DOWN;
+        } else if (y < 0) {
+            gesture_id = CST816S_SLIDE_UP;
+        }
+    } 
+}
+
+
+void process_touch_interrupt(void) {
+    // uint8_t interrupt_pin = gpio_get(INT_PIN);
+    // measure_pulse(interrupt_pin);
+
+    if (!touch_buf_init_flag) {
+        touch_buf_init_flag = true;
+        touch_irq_init();
+        touch_buf_init();
+    }
+    touch_buf_tick();
+    
+
+    if (T.in_contact) {
+        // touch_time = timer_read();
+        if (touch_state == TOUCH_STATE_NONE) {
             cst816t_XY touch_data = cst816t_Get_Point();
             pre_touch_x = touch_data.x_point;
             pre_touch_y = touch_data.y_point;
 
-            // uprintf("g id: %d\n", pre_touch_y); 
-            return;
+            fast_touch_time = timer_read();;
+            touch_state = TOUCH_STATE_START;
+            // uprintf("------START------\n");
+            // static uint16_t db_crood;
+            // if (pre_touch_x != db_crood) {
+            //     uprintf("pre crood: %d\n", pre_touch_x);
+            // }                
+            // db_crood = pre_touch_x;
+        } else if (touch_state == TOUCH_STATE_START) {
+            if (timer_elapsed(fast_touch_time) > touch_repeat_interval) {
+                cst816t_XY touch_data = cst816t_Get_Point();
+                now_touch_x = touch_data.x_point;
+                now_touch_y = touch_data.y_point;
+                // static uint16_t db_crood2;
+                // if (now_touch_x != db_crood2) {
+                //     uprintf("now crood: %d\n", now_touch_x);
+                // }                
+                // db_crood2 = now_touch_x;
+                second_touch_time = timer_read();
+                int16_t x = now_touch_x - pre_touch_x;
+                int16_t y = now_touch_y - pre_touch_y;
+                touch_mode_detected(x, y);
+                swipe_gesture_id_detected(x, y);
+                process_gesture();
+                touch_state = TOUCH_STATE_SINGLE;
+                // uprintf("-----SINGLE------\n");
+            }
+
+        } else if (touch_state == TOUCH_STATE_SINGLE) { 
+            if (timer_elapsed(second_touch_time) > touch_repeat_interval / 4) {
+                touch_signal = false;
+                touch_state = TOUCH_STATE_WAIT;
+                // uprintf("-----WAIT------\n");
+
+            }
+        } else if (touch_state == TOUCH_STATE_WAIT) {
+            if (timer_elapsed(second_touch_time) > touch_single_interval) {
+                touch_state = TOUCH_STATE_REPEAT;
+                touch_repeat_time = timer_read();
+            }
+        } else if (touch_state == TOUCH_STATE_REPEAT) {
+            if (timer_elapsed(touch_repeat_time) > touch_repeat_interval) {
+                touch_repeat_time = timer_read();
+                cst816t_XY touch_data = cst816t_Get_Point();
+                now_touch_x = touch_data.x_point;
+                now_touch_y = touch_data.y_point;
+                process_gesture();
+                // uprintf("-----REPEAT------\n");
+
+            }
         }
-
-        if (!touch_repeat_flag){
-            // if (timer_elapsed(touch_start_timer) >= 10) {
-                single_click_flag = true;
-                cst816t_XY touch_data = cst816t_Get_Point(); 
-                single_touch_x = touch_data.x_point;
-                single_touch_y = touch_data.y_point;
-            // }
-        }
-
-        if (timer_elapsed(touch_start_timer) >= TOUCH_TIME_MS) {
-            touch_repeat_flag = true;
-            cst816t_XY touch_data = cst816t_Get_Point(); 
-            touch_x = touch_data.x_point;
-            touch_y = touch_data.y_point;
-            gesture_id = classify_gesture(touch_x, touch_y, pre_touch_x,  pre_touch_y);
-            touch_start_timer = timer_read();
-            pre_touch_x = touch_x;
-            pre_touch_y = touch_y;
-            // uprintf("g id: %d\n", gesture_id); 
-            process_gesture(touch_data);
-            single_click_flag = false;
-
-        }
-
+            
     } else {
-        if (timer_elapsed(last_tap_time) > TOUCH_TIME_MS + 10) {
-            touch_signal = false;
+        if (timer_elapsed(fast_touch_time) > touch_repeat_interval + 30) {
+            if (touch_state != TOUCH_STATE_NONE) {
+                touch_signal = false;
+                touch_mode = TOUCH_MODE_NONE;
+                touch_state = TOUCH_STATE_NONE;
+                gesture_id = GESTURE_NONE;
+                // uprintf("------reset------\n");
+            }
         }
     }
 }
@@ -535,6 +655,9 @@ void display_redraw(void) {
             break;
         case DISPLAY_MODE_KEY_MATRIX:
             draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
+            break;
+        case DISPLAY_MODE_STATUS1:
+            status_view_init(display, noto9_font);
             break;
         default:
             break;

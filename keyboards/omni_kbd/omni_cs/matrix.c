@@ -204,16 +204,23 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
     changed |= read_rows_on_col(current_matrix, current_col);
     }
 
+    static bool touch_signal_latch = false;
+    if (touch_signal) {
+        touch_signal_latch = true;
+    }
+    
+
     switch (display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
-            if (!touch_signal) {
+            if (!touch_signal_latch) {
                 touch_x = 0xFFFF;
                 touch_y = 0xFFFF;
             }
-            if (timer_elapsed(last_touch_time) > TOUCH_DEBOUNCE_TIME) {
+            if (timer_elapsed(last_touch_time) > touch_repeat_interval) {
                 if (read_touch(current_matrix, true)) {
                     changed = true;
                     last_touch_time = timer_read();  
+                    touch_signal_latch = false;
                 }
             }
             break;

@@ -9,3 +9,4 @@
 bool qp_curve(painter_device_t device, float speed_adjust,int slope_factor, uint8_t hue, uint8_t sat, uint8_t val, uint8_t x_pos, uint8_t y_pos);
 bool qp_fill_arc(painter_device_t device, uint16_t centerx, uint16_t centery, uint16_t outer_radius, uint16_t inner_radius, uint16_t start_angle, uint16_t end_angle, uint8_t hue, uint8_t sat, uint8_t val);
 void qp_donut(painter_device_t device, uint16_t x, uint16_t y, uint16_t radius, uint16_t thickness, uint8_t hue, uint8_t sat, uint8_t val1, uint8_t val2);
+bool qp_round_rect(painter_device_t dev, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, uint16_t radius, uint8_t  hue, uint8_t sat, uint8_t val, bool filled, uint8_t stroke_w);

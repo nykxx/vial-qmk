@@ -33,16 +33,15 @@ enum custom_keycodes {
     KC_sat_sub_color_DOWN,
     KC_val_sub_color_UP,
     KC_val_sub_color_DOWN,
-    AUTO_MOUSE_TOGGLE,
     TB_R_MODE_TOGGLE,
     TB_L_MODE_TOGGLE,
-    TB_UD_SC_MODE_TOGGLE,
-    TB_LR_SC_MODE_TOGGLE,
     KC_DP_TOUCH_KEY,
     KC_DP_TB_TUNE,
     KC_DP_SWIPE_GESTURE,
     KC_DP_KEY_MAT,
+    KC_DP_STAT1,
 };
 
 extern point_t circles[6];
 extern uint16_t virtual_keycode[72];
+
