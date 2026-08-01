@@ -22,6 +22,7 @@
 #include "../common/view_keymap.h"
 #include "../common/power_lcd.h"
 #include "../common/status_view.h"
+#include "../common/trackball_tuning.h"
 #include "../drivers/pmw33xx_common.h"
 #include "../font/noto9.qff.h"
 #include "../font/noto11.qff.h"
@@ -172,7 +173,7 @@ static bool process_display_keycode(uint16_t keycode) {
             break;
         case KC_DP_TB_TUNE:
             display_mode = DISPLAY_MODE_TRACKBALL_TUNING;
-            show_trackball_tuning_mode();
+            trackball_tuning_draw(display, noto11_font);
             break;
         case KC_DP_SWIPE_GESTURE:
             display_mode = DISPLAY_MODE_SWIPE_GESTURE;

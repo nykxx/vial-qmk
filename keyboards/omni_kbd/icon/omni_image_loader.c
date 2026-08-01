@@ -106,9 +106,12 @@
 
 enum {
     LAYER_IMAGE_COUNT = 12,
-    MACRO_KEY_START   = 0x7700,
-    MACRO_KEY_END     = 0x77FE,
-    MACRO_KEY_COUNT   = MACRO_KEY_END - MACRO_KEY_START + 1,
+};
+
+enum {
+    MACRO_KEY_START = 0x7700,
+    MACRO_KEY_END   = 0x77FE,
+    MACRO_KEY_COUNT = MACRO_KEY_END - MACRO_KEY_START + 1,
 };
 
 static painter_image_handle_t logo_image;

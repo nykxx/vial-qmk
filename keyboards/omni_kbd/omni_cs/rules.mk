@@ -140,6 +140,7 @@ SRC += drivers/cst816t.c
 SRC += ../common/sleeping_view.c
 SRC += ../common/view_keymap.c
 SRC += ../common/trackball_omni.c
+SRC += ../common/trackball_tuning.c
 SRC += ../common/config_omni.c
 SRC += ../common/touch_input.c
 SRC += ../common/touch_lcd_omni.c

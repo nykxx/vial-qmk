@@ -5,11 +5,11 @@
 #include "touch_lcd_omni.h"
 #include "matrix.h"
 #include "draw_custom.h"
+#include "trackball_tuning.h"
 #include "touch_input.h"
 #include "view_keymap.h"
 #include "status_view.h"
 #include "../drivers/cst816t.h"
-#include "../icon/omni_image_loader.h"
 
 enum {
     TOUCH_RELEASE_GRACE_MS = 30,
@@ -76,39 +76,8 @@ static const swipe_action_config_t swipe_action_configs[SWIPE_PROFILE_COUNT] = {
 
 static uint8_t swipe_layer = 0;
 
-static float pre_speed_adjust1;
-static int pre_slope_factor1;
-static float pre_speed_adjust2;
-static int pre_slope_factor2;
-static uint8_t hue_tbtune_r = 220;
-static uint8_t sat_tbtune_r = 255;
-static uint8_t val_tbtune_r = 255;
-static uint8_t hue_tbtune_l = 135;
-static uint8_t sat_tbtune_l = 255;
-static uint8_t val_tbtune_l = 255;
-static const uint8_t x_pos1 = TOUCH_LCD_WIDTH / 2 + 50;
-static const uint8_t y_pos1 = TOUCH_LCD_HEIGHT / 2 - 10;
-static const uint8_t x_pos2 = TOUCH_LCD_WIDTH / 2 - 50;
-static const uint8_t y_pos2 = TOUCH_LCD_HEIGHT / 2 - 10;
-static const uint8_t y_pos3 = TOUCH_LCD_HEIGHT / 2 - 50;
-static const uint8_t y_pos4 = TOUCH_LCD_HEIGHT / 2 + 45;
-static const uint8_t x_pos_save = TOUCH_LCD_WIDTH / 2;
-static const uint8_t y_pos_save = TOUCH_LCD_HEIGHT / 2 + 90;
-static int16_t text1_width, text3_width, text4_width, text5_width, text6_width = 0;
-static const char *const text1 = "TB TUNE";
-static const char *const text3 = "Right";
-static const char *const text4 = "Left";
-static const char *const text5 = "+      +";
-static const char *const text6 = "-      -";
-
-static void process_touch_trackball_tuning_mode(uint16_t touch_x, uint16_t touch_y);
-
 static void draw_background(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
     qp_rect(display, x1, y1, x2, y2, hue_bg, sat_bg, val_bg, true);  // HSV: H=0, S=0, V=0 (黒色)
-}
-
-static void draw_background_black(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-    qp_rect(display, x1, y1, x2, y2, 0, 0, 0, true);  // HSV: H=0, S=0, V=0 (黒色)
 }
 
 void draw_background_all(void) {
@@ -287,11 +256,6 @@ static void swipe_gesture_process(void) {
 
 }
 
-static bool is_touch_in_circle(uint16_t touch_x, uint16_t touch_y, point_t circle, uint16_t radius) {
-    uint32_t distance_squared = (circle.x_coordinate - touch_x) * (circle.x_coordinate - touch_x) + (circle.y_coordinate - touch_y) * (circle.y_coordinate - touch_y);
-    return distance_squared <= (radius * radius);
-}
-
 static void process_touch(void) {
     touch_signal = true;
     touch_signal_view_update = true;
@@ -334,7 +298,7 @@ static void process_gesture(void){
         break;
 
     case DISPLAY_MODE_TRACKBALL_TUNING:
-        process_touch_trackball_tuning_mode(now_touch_x, now_touch_y);
+        trackball_tuning_handle_touch(display, noto11_font, now_touch_x, now_touch_y);
         break;
 
     case DISPLAY_MODE_SWIPE_GESTURE:
@@ -477,37 +441,6 @@ void process_touch_interrupt(void) {
     }
 }
 
-void show_trackball_tuning_mode(void) {
-    draw_background_all_black();
-    if (text1_width == 0) {
-        text1_width = qp_textwidth(noto11_font, text1);
-    }
-    if (text3_width == 0) {
-        text3_width = qp_textwidth(noto11_font, text3);
-    }
-    if (text4_width == 0) {
-        text4_width = qp_textwidth(noto11_font, text4);
-    }
-    if (text5_width == 0) {
-        text5_width = qp_textwidth(noto11_font, text5);
-    }
-    if (text6_width == 0) {
-        text6_width = qp_textwidth(noto11_font, text6);
-    }
-    qp_drawtext(display, TOUCH_LCD_WIDTH / 2 - text1_width / 2, TOUCH_LCD_HEIGHT / 2 - 70 - noto11_font->line_height, noto11_font, text1);
-    qp_drawtext(display, x_pos1 - text3_width / 2, TOUCH_LCD_HEIGHT / 2 + 80 - noto11_font->line_height, noto11_font, text3);
-    qp_drawtext(display, x_pos1 - text5_width / 2, y_pos3 - noto11_font->line_height / 2, noto11_font, text5);
-    qp_drawtext(display, x_pos1 - text6_width / 2, y_pos4 - noto11_font->line_height / 2, noto11_font, text6);
-    qp_drawtext(display, x_pos2 - text4_width / 2, TOUCH_LCD_HEIGHT / 2 + 80 - noto11_font->line_height, noto11_font, text4);
-    qp_drawtext(display, x_pos2 - text5_width / 2, y_pos3 - noto11_font->line_height / 2, noto11_font, text5);
-    qp_drawtext(display, x_pos2 - text6_width / 2, y_pos4 - noto11_font->line_height / 2, noto11_font, text6);
-    qp_curve(display, speed_adjust1, slope_factor1, hue_tbtune_r, sat_tbtune_r, val_tbtune_r, x_pos1, y_pos1);
-    qp_curve(display, speed_adjust2, slope_factor2, hue_tbtune_l, sat_tbtune_l, val_tbtune_l, x_pos2, y_pos2);
-    painter_image_handle_t save_image = omni_save_image();
-    qp_drawimage(display, x_pos_save - save_image->width / 2, y_pos_save - save_image->height / 2, save_image);
-    qp_flush(display);
-}
-
 void display_redraw(void) {
     switch (display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
@@ -515,7 +448,7 @@ void display_redraw(void) {
             draw_lcd_layer_category_images();
             break;
         case DISPLAY_MODE_TRACKBALL_TUNING:
-            show_trackball_tuning_mode();
+            trackball_tuning_draw(display, noto11_font);
             break;
         case DISPLAY_MODE_SWIPE_GESTURE:
             draw_background_all();
@@ -532,69 +465,4 @@ void display_redraw(void) {
         default:
             break;
     }
-}
-
-static void process_touch_trackball_tuning_mode(uint16_t touch_x, uint16_t touch_y) {
-    const uint8_t radius = 22;
-    const uint8_t radius_gap = 1;
-    point_t plus1_center = {x_pos1 - (radius + radius_gap), y_pos4}; 
-    point_t minus1_center = {x_pos1 - (radius + radius_gap), y_pos3};
-    point_t plus2_center = {x_pos2 - (radius + radius_gap), y_pos4}; 
-    point_t minus2_center = {x_pos2 - (radius + radius_gap), y_pos3};
-    point_t plus3_center = {x_pos1 + (radius + radius_gap), y_pos3}; 
-    point_t minus3_center = {x_pos1 + (radius + radius_gap), y_pos4};
-    point_t plus4_center = {x_pos2 + (radius + radius_gap), y_pos3}; 
-    point_t minus4_center = {x_pos2 + (radius + radius_gap), y_pos4};
-    point_t save_center = {x_pos_save, y_pos_save + 5};
-    if (is_touch_in_circle(touch_x, touch_y, plus1_center, radius)) {
-        speed_adjust1 += 0.2;
-        if (speed_adjust1 > 3.0f) speed_adjust1 = 3.0f;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, minus1_center, radius)) {
-        speed_adjust1 -= 0.2;
-        if (speed_adjust1 < 0.2f) speed_adjust1 =  0.2f;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, plus2_center, radius)) {
-        speed_adjust2 += 0.2;
-        if (speed_adjust2 > 3.0f) speed_adjust2 = 3.0f;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, minus2_center, radius)) {
-        speed_adjust2 -= 0.2;
-        if (speed_adjust2 < 0.2f) speed_adjust2 = 0.2f;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, plus3_center, radius)) {
-        slope_factor1 += 5;
-        if (slope_factor1 > 100) slope_factor1 = 100;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, minus3_center, radius)) {
-        slope_factor1 -= 5;
-        if (slope_factor1 < 10) slope_factor1 = 10;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, plus4_center, radius)) {
-        slope_factor2 += 5;
-        if (slope_factor2 > 100) slope_factor2 = 100;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, minus4_center, radius)) {
-        slope_factor2 -= 5;
-        if (slope_factor2 < 10) slope_factor2 = 10;
-    }
-    else if (is_touch_in_circle(touch_x, touch_y, save_center, radius)) {
-        save_omni_tb_config();
-        show_trackball_tuning_mode();
-    }
-    if (pre_speed_adjust1 != speed_adjust1 || pre_slope_factor1 != slope_factor1) {
-        draw_background_black(TOUCH_LCD_WIDTH / 2 + 15, TOUCH_LCD_HEIGHT / 2 - 40, TOUCH_LCD_WIDTH / 2 + 85, TOUCH_LCD_HEIGHT / 2 + 25);
-
-        wait_ms(10);
-        qp_curve(display, speed_adjust1, slope_factor1, hue_tbtune_r, sat_tbtune_r, val_tbtune_r, x_pos1, y_pos1);
-    }else if (pre_speed_adjust2 != speed_adjust2 || pre_slope_factor2 != slope_factor2) {
-        draw_background_black(TOUCH_LCD_WIDTH / 2 - 85, TOUCH_LCD_HEIGHT / 2 - 40, TOUCH_LCD_WIDTH / 2 - 15, TOUCH_LCD_HEIGHT / 2 + 25);
-
-        wait_ms(10);
-        qp_curve(display, speed_adjust2, slope_factor2, hue_tbtune_l, sat_tbtune_l, val_tbtune_l, x_pos2, y_pos2);
-    }
-    pre_speed_adjust1 = speed_adjust1;
-    pre_speed_adjust2 = speed_adjust2;
-    pre_slope_factor1 = slope_factor1;
-    pre_slope_factor2 = slope_factor2;
 }
