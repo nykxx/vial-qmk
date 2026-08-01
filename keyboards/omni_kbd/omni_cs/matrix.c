@@ -17,6 +17,13 @@
 static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
 static const pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
 
+enum {
+    PHYSICAL_MATRIX_ROWS = MATRIX_ROWS / 2,
+    TOUCH_KEY_COUNT      = 6,
+    TOUCH_KEY_RADIUS     = 30,
+    INVALID_TOUCH_INDEX  = UINT8_MAX,
+};
+
 static void select_row(uint8_t row)
 {
     setPinOutput(row_pins[row]);
@@ -54,14 +61,8 @@ static void unselect_cols(void)
 }
 
 static void init_pins(void) {
-  unselect_rows();
-  unselect_cols();
-  for (uint8_t x = 0; x < MATRIX_COLS; x++) {
-    setPinInputHigh(col_pins[x]);
-  }
-  for (uint8_t x = 0; x < MATRIX_ROWS; x++) {
-    setPinInputHigh(row_pins[x]);
-  }
+    unselect_rows();
+    unselect_cols();
 }
 
 static bool read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row)
@@ -101,9 +102,9 @@ static bool read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col)
     matrix_io_delay();
 
     // For each row...
-    for(uint8_t row_index = 0; row_index < MATRIX_ROWS/2; row_index++)
+    for(uint8_t row_index = 0; row_index < PHYSICAL_MATRIX_ROWS; row_index++)
     {
-        uint8_t tmp = row_index + MATRIX_ROWS/2;
+        uint8_t tmp = row_index + PHYSICAL_MATRIX_ROWS;
         // Store last value of row prior to reading
         matrix_row_t last_row_value = current_matrix[tmp];
 
@@ -147,13 +148,13 @@ int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, point_t circle
             return i;
         }
     }
-    return 255; 
+    return INVALID_TOUCH_INDEX;
 }
 
 
 bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, uint16_t touch_y) {
-    uint8_t touched_index = check_touch_within_radius(touch_x, touch_y, circles, 6, 30);
-    if (touched_index != 255) {
+    uint8_t touched_index = check_touch_within_radius(touch_x, touch_y, circles, TOUCH_KEY_COUNT, TOUCH_KEY_RADIUS);
+    if (touched_index != INVALID_TOUCH_INDEX) {
         if (touch_x <= TOUCH_LCD_WIDTH && touch_y <= TOUCH_LCD_HEIGHT) {
             *row = (uint8_t)current_lcd_category + current_lcd_layer * (MAX_LCD_CATEGORY + 1) + MATRIX_ROWS + 4 ;
             *col = (uint8_t)touched_index;
@@ -165,8 +166,7 @@ bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, uint16_
     return false;
 }
 
-bool read_touch(matrix_row_t current_matrix[], bool call_to_row) {
-    bool matrix_changed = false;
+static bool read_touch(matrix_row_t current_matrix[]) {
     uint8_t row_index = 0, col_index = 0;
     if (get_touch_coordinates(&row_index, &col_index, touch_x, touch_y)) {
         select_col(col_index);
@@ -177,12 +177,11 @@ bool read_touch(matrix_row_t current_matrix[], bool call_to_row) {
         } else {
             current_matrix[row_index] &= ~(MATRIX_ROW_SHIFTER << col_index);
         }
-        if ((last_row_value != current_matrix[row_index]) && !(matrix_changed)) {
-            matrix_changed = true;
-        }
+        bool matrix_changed = last_row_value != current_matrix[row_index];
         unselect_col(col_index);
-        }
-    return matrix_changed;
+        return matrix_changed;
+    }
+    return false;
 }
 
 
@@ -195,13 +194,13 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
 {
     bool changed = false;
     // Set row, read cols
-    for (uint8_t current_row = 0; current_row < MATRIX_ROWS / 2; current_row++) {
-    changed |= read_cols_on_row(current_matrix, current_row);
+    for (uint8_t current_row = 0; current_row < PHYSICAL_MATRIX_ROWS; current_row++) {
+        changed |= read_cols_on_row(current_matrix, current_row);
     }
     //else
     // Set col, read rows
     for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++) {
-    changed |= read_rows_on_col(current_matrix, current_col);
+        changed |= read_rows_on_col(current_matrix, current_col);
     }
 
     static bool touch_signal_latch = false;
@@ -217,7 +216,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
                 touch_y = 0xFFFF;
             }
             if (timer_elapsed(last_touch_time) > touch_repeat_interval) {
-                if (read_touch(current_matrix, true)) {
+                if (read_touch(current_matrix)) {
                     changed = true;
                     last_touch_time = timer_read();  
                     touch_signal_latch = false;
@@ -235,8 +234,8 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
             break;
     }
 
-  last_matrix_state = changed;
-  return changed;
+    last_matrix_state = changed;
+    return changed;
 }
 
 bool get_last_matrix_state(void) {

@@ -53,12 +53,62 @@ static uint16_t blink_start_time = 0;
 static bool is_backlight_off = false;
 bool lcd_is_on = true;
 
+enum {
+    LCD_CATEGORY_COUNT     = 4,
+    LCD_LAYER_COUNT        = 3,
+    LCD_KEYS_PER_LAYER     = 6,
+    LCD_BACKLIGHT_BLINK_MS = 50,
+    STARTUP_ANIMATION_MS   = 3000,
+};
+
+static void update_layer_display(void) {
+    if (current_layer == pre_layer) {
+        return;
+    }
+
+    if (display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
+        swipe_gesture_main_view_update(current_layer);
+    } else if (display_mode == DISPLAY_MODE_KEY_MATRIX) {
+        bool should_redraw = !get_auto_mouse_enable() || (current_layer != _MOUSE && pre_layer != _MOUSE);
+        if (should_redraw) {
+            draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
+        }
+    }
+}
+
+static void update_touch_feedback(void) {
+    if (ENABLE_TOUCH_UPDATE != 1 || !touch_signal_view_update) {
+        return;
+    }
+
+    if (!is_backlight_off) {
+        writePinLow(BLK_PIN);
+        blink_start_time = timer_read();
+        is_backlight_off = true;
+    }
+    if (timer_elapsed(blink_start_time) >= LCD_BACKLIGHT_BLINK_MS) {
+        writePinHigh(BLK_PIN);
+        is_backlight_off = false;
+        touch_signal_view_update = false;
+    }
+}
+
+static void draw_second_frame(void) {
+    if (!is_first_frame && is_second_frame) {
+        draw_lcd_layer_category_images();
+        qp_flush(display);
+        is_second_frame = false;
+    }
+}
+
 void initialize_lcd_layer_app_images(void) {
-    for (int j = 0; j < 4; j++) {
-        for (int i = 0; i < 3; i++) {
-            lcd_layer_app_images[i][j][0] = (ImagePosition){get_layer_img_func(i + j*3), home_point.x, home_point.y};
-            for (int k = 0; k < 6; k++) {
-                lcd_layer_app_images[i][j][k + 1] = (ImagePosition){get_img_func(virtual_keycode[k + i*6 + j*18]), circles[k].x, circles[k].y};
+    for (int category = 0; category < LCD_CATEGORY_COUNT; category++) {
+        for (int layer = 0; layer < LCD_LAYER_COUNT; layer++) {
+            int layer_index = layer + category * LCD_LAYER_COUNT;
+            lcd_layer_app_images[layer][category][0] = (ImagePosition){get_layer_img_func(layer_index), home_point.x, home_point.y};
+            for (int key = 0; key < LCD_KEYS_PER_LAYER; key++) {
+                int key_index = key + layer * LCD_KEYS_PER_LAYER + category * LCD_LAYER_COUNT * LCD_KEYS_PER_LAYER;
+                lcd_layer_app_images[layer][category][key + 1] = (ImagePosition){get_img_func(virtual_keycode[key_index]), circles[key].x, circles[key].y};
             }
         }
     }
@@ -78,7 +128,7 @@ void load_virtual_keys(void) {
     }
     int i = 0;
     for (int row = 0; row < MATRIX_ROWS / 2; row++) {
-        if (row == 0 || row == 1 || row == 2 || row == 3) {
+        if (row < LCD_CATEGORY_COUNT) {
             continue;
         }
         for (int col = 0; col < MATRIX_COLS; col++) {
@@ -152,25 +202,7 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
         hscroll = false;
     }
 
-    if(display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
-        if (current_layer != pre_layer) {
-            swipe_gesture_main_view_update(current_layer);
-        }
-    } else if (display_mode ==  DISPLAY_MODE_KEY_MATRIX) {
-        if (!get_auto_mouse_enable()) {
-            if(current_layer != pre_layer) {
-                draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
-            }            
-        } else {
-            if (current_layer != _MOUSE) {
-                if (pre_layer != _MOUSE) {
-                    if (current_layer != pre_layer) {
-                        draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
-                    }
-                }
-            }
-        }
-    }
+    update_layer_display();
     pre_layer = current_layer;
 
     pmw33xx_report_t report0 = pmw33xx_read_burst(0); // Sensor #1
@@ -194,27 +226,8 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
         process_high_res_scroll_report(&mouse_report, report1, &tb_scroll_state_l, speed_adjust2, slope_factor2, 1, -1, 3);
     }
 
-    if (ENABLE_TOUCH_UPDATE == 1) {
-        if (touch_signal_view_update) {
-            if (!is_backlight_off) {
-                writePinLow(BLK_PIN);
-                blink_start_time = timer_read();
-                is_backlight_off = true;
-            }
-            if (is_backlight_off && timer_elapsed(blink_start_time) >= 50) {
-                writePinHigh(BLK_PIN);
-                is_backlight_off = false;
-                touch_signal_view_update = false;
-            }
-        }
-    }
-    if (!is_first_frame) {
-        if (is_second_frame) {
-            draw_lcd_layer_category_images();
-            qp_flush(display);
-            is_second_frame = false;
-        }
-    }
+    update_touch_feedback();
+    draw_second_frame();
     return pointing_device_task_user(mouse_report);
 }
 
@@ -259,7 +272,7 @@ void sleeping_kb(bool matrix_changed) {
 
 void housekeeping_task_user(void) {
     lcd_current_time = timer_read();
-    if (lcd_current_time - lcd_fast_res_time > 3000) {
+    if (lcd_current_time - lcd_fast_res_time > STARTUP_ANIMATION_MS) {
         if (is_first_frame) {
             is_first_frame = false;
             qp_stop_animation(my_anim);
@@ -411,6 +424,5 @@ void __wrap_dynamic_keymap_set_keycode(uint8_t layer, uint8_t row, uint8_t col, 
         display_mode =  DISPLAY_MODE_TOUCH_KEY;
     }
 }
-
 
 
