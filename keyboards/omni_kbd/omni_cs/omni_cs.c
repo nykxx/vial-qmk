@@ -142,6 +142,16 @@ void keyboard_post_init_kb(void) {
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     current_layer = get_highest_layer(layer_state);
+    static bool hscroll = false;
+    if (current_layer == _MARK) {
+        hscroll = true;
+    } else if (current_layer == _MOUSE && hscroll) {
+        // auto mouse layerによってマウスレイヤーに切り替わるので
+        // hscrollフラグが立っている場合そのままにする
+    } else {
+        hscroll = false;
+    }
+
     if(display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
         if (current_layer != pre_layer) {
             swipe_gesture_main_view_update(current_layer);
