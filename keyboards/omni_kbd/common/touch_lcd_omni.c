@@ -33,12 +33,48 @@ bool initial_touch_flag = false;
 bool touch_signal_view_update = false;
 uint8_t gesture_id = GESTURE_NONE;
 
-display_mode_t display_mode =  DISPLAY_MODE_TOUCH_KEY;
-painter_image_handle_t image_logo;
-painter_image_handle_t image_save;
-painter_image_handle_t layer_00, layer_01, layer_02, layer_03, layer_04, layer_05, layer_06, layer_07, layer_08, layer_09, layer_10, layer_11;
-painter_image_handle_t image_000, image_001, image_002, image_003, image_004, image_005, image_006, image_007, image_008, image_009, image_010, image_011, image_012, image_013, image_014, image_015, image_016, image_017, image_018, image_019, image_020, image_021, image_022, image_023, image_024, image_025, image_026, image_027, image_028, image_029, image_030, image_031, image_032, image_033, image_034, image_035, image_036, image_037, image_038, image_039, image_040, image_041, image_042, image_043, image_044, image_045, image_046, image_047, image_048, image_049, image_050, image_051, image_052, image_053, image_054, image_055, image_056, image_057, image_058, image_059, image_060, image_061, image_062, image_063, image_064, image_065, image_066, image_067, image_068, image_069, image_070, image_071, image_072, image_073, image_074, image_075, image_076, image_077, image_078, image_079, image_080, image_081, image_082, image_083, image_084, image_085, image_086, image_087, image_088, image_089, image_090, image_091, image_092, image_093, image_094, image_095, image_096, image_097, image_098, image_099, image_100, image_101, image_102, image_103, image_104, image_105, image_106, image_107, image_108, image_109, image_110, image_111, image_112, image_113, image_114, image_115, image_116, image_117, image_118, image_119, image_120, image_121, image_122, image_123, image_124, image_125, image_126, image_127, image_128, image_129, image_130, image_131, image_132, image_133, image_134, image_135, image_136, image_137, image_138, image_139, image_140, image_141, image_142, image_143, image_144, image_145, image_146, image_147, image_148, image_149, image_150, image_151, image_152, image_153, image_154, image_155, image_156, image_157, image_158, image_159, image_160, image_161, image_162, image_163, image_164, image_165, image_166, image_167, image_168, image_169, image_170, image_171, image_172, image_173, image_174, image_175, image_176, image_177, image_178, image_179, image_180, image_181, image_182, image_183, image_184, image_185, image_186, image_187, image_188, image_189, image_190, image_191, image_192, image_193, image_194, image_195, image_196, image_197, image_198, image_199, image_200, image_201, image_202, image_203, image_204, image_205, image_206, image_207, image_208, image_209, image_210, image_211, image_212, image_213, image_214, image_215, image_216, image_217, image_218, image_219, image_220, image_221, image_222, image_223, image_224, image_225, image_226, image_227, image_228, image_229, image_230, image_231, image_232, image_233, image_234, image_235, image_236, image_237, image_238, image_239, image_240, image_241, image_242, image_243, image_244, image_245, image_246, image_247, image_248, image_249, image_250, image_251, image_252, image_253, image_254;
-static int swipe_layer = 0;
+display_mode_t display_mode = DISPLAY_MODE_TOUCH_KEY;
+
+enum {
+    SWIPE_PROFILE_COUNT = 4,
+};
+
+typedef enum {
+    SWIPE_MODIFIER_NONE,
+    SWIPE_MODIFIER_CONTROL,
+    SWIPE_MODIFIER_CONTROL_GUI,
+} swipe_modifier_t;
+
+typedef struct {
+    const char *right_label;
+    const char *left_label;
+    const char *up_label;
+    uint8_t active_indicator_x;
+    uint8_t previous_indicator_x;
+} swipe_view_config_t;
+
+typedef struct {
+    uint8_t right_keycode;
+    uint8_t left_keycode;
+    uint8_t up_keycode;
+    swipe_modifier_t modifier;
+} swipe_action_config_t;
+
+static const swipe_view_config_t swipe_view_configs[SWIPE_PROFILE_COUNT] = {
+    {.right_label = "NEXT", .left_label = "BACK", .up_label = "Save", .active_indicator_x = 90,  .previous_indicator_x = 150},
+    {.right_label = "PG>",  .left_label = "<PG",  .up_label = "NEW",  .active_indicator_x = 110, .previous_indicator_x = 90},
+    {.right_label = "VD>",  .left_label = "<VD",  .up_label = "VDNEW", .active_indicator_x = 130, .previous_indicator_x = 110},
+    {.right_label = "CST1", .left_label = "CST2", .up_label = "CST3", .active_indicator_x = 150, .previous_indicator_x = 130},
+};
+
+static const swipe_action_config_t swipe_action_configs[SWIPE_PROFILE_COUNT] = {
+    {.right_keycode = KC_Y,     .left_keycode = KC_Z,    .up_keycode = KC_S,   .modifier = SWIPE_MODIFIER_CONTROL},
+    {.right_keycode = KC_PGDN,  .left_keycode = KC_PGUP, .up_keycode = KC_N,   .modifier = SWIPE_MODIFIER_CONTROL},
+    {.right_keycode = KC_RIGHT, .left_keycode = KC_LEFT, .up_keycode = KC_D,   .modifier = SWIPE_MODIFIER_CONTROL_GUI},
+    {.right_keycode = KC_F13,   .left_keycode = KC_F14,  .up_keycode = KC_F15, .modifier = SWIPE_MODIFIER_NONE},
+};
+
+static uint8_t swipe_layer = 0;
 
 static float pre_speed_adjust1;
 static int pre_slope_factor1;
@@ -161,7 +197,7 @@ static void update_lcd_layer_category_by_gesture(void) {
 }
     
 static void change_swipe_layer(void) {
-    swipe_layer = (swipe_layer + 1) % 4;
+    swipe_layer = (swipe_layer + 1) % SWIPE_PROFILE_COUNT;
 }
 
 const char* get_layer_name(uint8_t layer) {
@@ -200,147 +236,71 @@ void swipe_gesture_base_view_update(void) {
     qp_circle(display, 150, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, false);
 }
 
-static void swipe_gesture_view_update(const char *text_r, const char *text_l, const char *text_u, uint8_t x1, uint8_t x2) {
-    uint8_t text_width_r = qp_textwidth(noto11_font, text_r);
-    uint8_t text_width_L = qp_textwidth(noto11_font, text_l);
-    uint8_t text_width_U = qp_textwidth(noto11_font, text_u);
-    uint8_t text_hight = noto11_font->line_height;
-    draw_background(150, 120 - text_hight / 2, 230, 120 + text_hight / 2);  
-    draw_background(10 , 120 - text_hight / 2, 90 , 120 + text_hight / 2); 
-    draw_background(80 , 40  - text_hight / 2, 160, 40  + text_hight / 2); 
-    qp_drawtext_recolor(display, 190 - text_width_r / 2, 120 - text_hight / 2, noto11_font, text_r, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_drawtext_recolor(display, 50  - text_width_L / 2, 120 - text_hight / 2, noto11_font, text_l, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_drawtext_recolor(display, 120 - text_width_U / 2, 40  - text_hight / 2, noto11_font, text_u, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_circle(display, x1, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, true);
-    qp_circle(display, x2, 190, 4, hue_bg, sat_bg, val_bg, true);
+static void swipe_gesture_view_update(const swipe_view_config_t *view_config) {
+    uint8_t right_text_width = qp_textwidth(noto11_font, view_config->right_label);
+    uint8_t left_text_width = qp_textwidth(noto11_font, view_config->left_label);
+    uint8_t up_text_width = qp_textwidth(noto11_font, view_config->up_label);
+    uint8_t text_height = noto11_font->line_height;
+    draw_background(150, 120 - text_height / 2, 230, 120 + text_height / 2);
+    draw_background(10, 120 - text_height / 2, 90, 120 + text_height / 2);
+    draw_background(80, 40 - text_height / 2, 160, 40 + text_height / 2);
+    qp_drawtext_recolor(display, 190 - right_text_width / 2, 120 - text_height / 2, noto11_font, view_config->right_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
+    qp_drawtext_recolor(display, 50 - left_text_width / 2, 120 - text_height / 2, noto11_font, view_config->left_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
+    qp_drawtext_recolor(display, 120 - up_text_width / 2, 40 - text_height / 2, noto11_font, view_config->up_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
+    qp_circle(display, view_config->active_indicator_x, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, true);
+    qp_circle(display, view_config->previous_indicator_x, 190, 4, hue_bg, sat_bg, val_bg, true);
     qp_flush(display);
 }
 
 void swipe_gesture_layer_view_update(void){
-    switch (swipe_layer) {
-        case 0:
-            swipe_gesture_view_update("NEXT", "BACK", "Save", 90, 150);
-            break;
-        case 1:
-            swipe_gesture_view_update("PG>", "<PG", "NEW", 110, 90);
-            break;  
-        case 2:
-            swipe_gesture_view_update("VD>", "<VD", "VDNEW", 130, 110);
-            break;
-        case 3:
-            swipe_gesture_view_update("CST1", "CST2", "CST3", 150, 130);
-            break;
-        default:
-            break;
+    if (swipe_layer < SWIPE_PROFILE_COUNT) {
+        swipe_gesture_view_update(&swipe_view_configs[swipe_layer]);
+    }
+}
+
+static void tap_swipe_keycode(uint8_t keycode, swipe_modifier_t modifier) {
+    if (modifier == SWIPE_MODIFIER_CONTROL || modifier == SWIPE_MODIFIER_CONTROL_GUI) {
+        register_code(KC_LCTL);
+    }
+    if (modifier == SWIPE_MODIFIER_CONTROL_GUI) {
+        register_code(KC_LGUI);
+    }
+
+    tap_code(keycode);
+
+    if (modifier == SWIPE_MODIFIER_CONTROL_GUI) {
+        unregister_code(KC_LGUI);
+    }
+    if (modifier == SWIPE_MODIFIER_CONTROL || modifier == SWIPE_MODIFIER_CONTROL_GUI) {
+        unregister_code(KC_LCTL);
     }
 }
 
 static void swipe_gesture_process(void) {
-        switch (swipe_layer) {
-            case 0:
-                switch (gesture_id) {
-                    case CST816S_SLIDE_RIGHT:
-                        register_code(KC_LCTL);
-                        tap_code(KC_Y);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_LEFT:
-                        register_code(KC_LCTL);
-                        tap_code(KC_Z);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_UP:
-                        register_code(KC_LCTL);
-                        tap_code(KC_S);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_DOWN:
-                        change_swipe_layer();
-                        swipe_gesture_layer_view_update();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 1:
-                switch (gesture_id) {
-                    case CST816S_SLIDE_RIGHT:
-                        register_code(KC_LCTL);
-                        tap_code(KC_PGDN);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_LEFT:
-                        register_code(KC_LCTL);
-                        tap_code(KC_PGUP);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_UP:
-                        register_code(KC_LCTL);
-                        tap_code(KC_N);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_DOWN:
-                        change_swipe_layer();
-                        swipe_gesture_layer_view_update();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 2:
-                switch (gesture_id) {
-                    case CST816S_SLIDE_RIGHT:
-                        register_code(KC_LCTL);
-                        register_code(KC_LGUI);
-                        tap_code(KC_RIGHT);
-                        unregister_code(KC_LGUI);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_LEFT:
-                        register_code(KC_LCTL);
-                        register_code(KC_LGUI);
-                        tap_code(KC_LEFT);
-                        unregister_code(KC_LGUI);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_UP:
-                        register_code(KC_LCTL);
-                        register_code(KC_LGUI);
-                        tap_code(KC_D);
-                        unregister_code(KC_LGUI);
-                        unregister_code(KC_LCTL);
-                        break;
-                    case CST816S_SLIDE_DOWN:
-                        change_swipe_layer();
-                        swipe_gesture_layer_view_update();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 3:
-                switch (gesture_id) {
-                    case CST816S_SLIDE_RIGHT:
-                        tap_code(KC_F13);
-                        break;
-                    case CST816S_SLIDE_LEFT:
-                        tap_code(KC_F14);
-                        break;
-                    case CST816S_SLIDE_UP:
-                        tap_code(KC_F15);
-                        break;
-                    case CST816S_SLIDE_DOWN:
-                        change_swipe_layer();
-                        swipe_gesture_layer_view_update();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    // }
+    if (swipe_layer >= SWIPE_PROFILE_COUNT) {
+        return;
+    }
+
+    if (gesture_id == CST816S_SLIDE_DOWN) {
+        change_swipe_layer();
+        swipe_gesture_layer_view_update();
+        return;
+    }
+
+    const swipe_action_config_t *action_config = &swipe_action_configs[swipe_layer];
+    switch (gesture_id) {
+        case CST816S_SLIDE_RIGHT:
+            tap_swipe_keycode(action_config->right_keycode, action_config->modifier);
+            break;
+        case CST816S_SLIDE_LEFT:
+            tap_swipe_keycode(action_config->left_keycode, action_config->modifier);
+            break;
+        case CST816S_SLIDE_UP:
+            tap_swipe_keycode(action_config->up_keycode, action_config->modifier);
+            break;
+        default:
+            break;
+    }
 
 }
 
