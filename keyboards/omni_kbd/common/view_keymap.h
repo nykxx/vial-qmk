@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quantum.h"
+#include "omni_layers.h"
 
 #define DISPLAY_WIDTH 200
 #define DISPLAY_HEIGHT 80
@@ -22,6 +23,7 @@ typedef enum {
 
 extern keyboard_layout_t current_layout;
 
+const char *get_layer_name(uint8_t layer);
 const char* get_display_string_from_keycode(uint16_t keycode);
 
 void draw_key_matrix(painter_device_t display, painter_font_handle_t font1, painter_font_handle_t font2, uint8_t current_layer);

@@ -22,6 +22,7 @@
 #include "../common/view_keymap.h"
 #include "../common/power_lcd.h"
 #include "../common/status_view.h"
+#include "../common/swipe_gesture.h"
 #include "../common/trackball_tuning.h"
 #include "../drivers/pmw33xx_common.h"
 #include "../font/noto9.qff.h"
@@ -68,7 +69,7 @@ static void update_layer_display(void) {
     }
 
     if (display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
-        swipe_gesture_main_view_update(current_layer);
+        swipe_gesture_draw_main(display, noto11_font, current_layer);
     } else if (display_mode == DISPLAY_MODE_KEY_MATRIX) {
         bool should_redraw = !get_auto_mouse_enable() || (current_layer != _MOUSE && pre_layer != _MOUSE);
         if (should_redraw) {
@@ -178,9 +179,9 @@ static bool process_display_keycode(uint16_t keycode) {
         case KC_DP_SWIPE_GESTURE:
             display_mode = DISPLAY_MODE_SWIPE_GESTURE;
             draw_background_all();
-            swipe_gesture_layer_view_update();
-            swipe_gesture_base_view_update();
-            swipe_gesture_main_view_update(current_lcd_layer);
+            swipe_gesture_draw_profile(display, noto11_font);
+            swipe_gesture_draw_base(display);
+            swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
             break;
         case KC_DP_KEY_MAT:
             display_mode = DISPLAY_MODE_KEY_MATRIX;
@@ -199,9 +200,9 @@ static bool process_display_keycode(uint16_t keycode) {
 static void refresh_swipe_gesture_view(void) {
     save_omni_color_config();
     draw_background_all();
-    swipe_gesture_base_view_update();
-    swipe_gesture_main_view_update(current_lcd_layer);
-    swipe_gesture_layer_view_update();
+    swipe_gesture_draw_base(display);
+    swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
+    swipe_gesture_draw_profile(display, noto11_font);
 }
 
 static void load_persistent_config(void) {

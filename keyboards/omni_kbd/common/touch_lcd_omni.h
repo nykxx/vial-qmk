@@ -48,13 +48,8 @@ extern bool touch_signal_view_update;
 extern uint16_t touch_repeat_interval;
 extern uint8_t gesture_id;
 
-const char *get_layer_name(uint8_t layer);
-
 void display_redraw(void);
 void draw_background_all(void);
 void draw_background_all_black(void);
 void draw_lcd_layer_category_images(void);
-void swipe_gesture_main_view_update(uint8_t current_layer);
 void process_touch_interrupt(void);
-void swipe_gesture_layer_view_update(void);
-void swipe_gesture_base_view_update(void);

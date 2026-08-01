@@ -10,6 +10,25 @@
 
 keyboard_layout_t current_layout = KEYBOARD_LAYOUT_US;
 
+const char *get_layer_name(uint8_t layer) {
+    switch (layer) {
+        case _BASE:
+            return "BASE";
+        case _MARK:
+            return "MARK ";
+        case _FUNC:
+            return "FUNC";
+        case _NUM:
+            return "NUM";
+        case _MOUSE:
+            return "MOUS";
+        case _CUSTOM:
+            return "CUST";
+        default:
+            return "UNKN";
+    }
+}
+
 
 // USは未対応
 const char* get_display_string_us(uint16_t keycode) {

@@ -4,11 +4,11 @@
 #include "qp.h"
 #include "touch_lcd_omni.h"
 #include "matrix.h"
-#include "draw_custom.h"
 #include "trackball_tuning.h"
 #include "touch_input.h"
 #include "view_keymap.h"
 #include "status_view.h"
+#include "swipe_gesture.h"
 #include "../drivers/cst816t.h"
 
 enum {
@@ -34,51 +34,6 @@ bool touch_signal_view_update = false;
 uint8_t gesture_id = GESTURE_NONE;
 
 display_mode_t display_mode = DISPLAY_MODE_TOUCH_KEY;
-
-enum {
-    SWIPE_PROFILE_COUNT = 4,
-};
-
-typedef enum {
-    SWIPE_MODIFIER_NONE,
-    SWIPE_MODIFIER_CONTROL,
-    SWIPE_MODIFIER_CONTROL_GUI,
-} swipe_modifier_t;
-
-typedef struct {
-    const char *right_label;
-    const char *left_label;
-    const char *up_label;
-    uint8_t active_indicator_x;
-    uint8_t previous_indicator_x;
-} swipe_view_config_t;
-
-typedef struct {
-    uint8_t right_keycode;
-    uint8_t left_keycode;
-    uint8_t up_keycode;
-    swipe_modifier_t modifier;
-} swipe_action_config_t;
-
-static const swipe_view_config_t swipe_view_configs[SWIPE_PROFILE_COUNT] = {
-    {.right_label = "NEXT", .left_label = "BACK", .up_label = "Save", .active_indicator_x = 90,  .previous_indicator_x = 150},
-    {.right_label = "PG>",  .left_label = "<PG",  .up_label = "NEW",  .active_indicator_x = 110, .previous_indicator_x = 90},
-    {.right_label = "VD>",  .left_label = "<VD",  .up_label = "VDNEW", .active_indicator_x = 130, .previous_indicator_x = 110},
-    {.right_label = "CST1", .left_label = "CST2", .up_label = "CST3", .active_indicator_x = 150, .previous_indicator_x = 130},
-};
-
-static const swipe_action_config_t swipe_action_configs[SWIPE_PROFILE_COUNT] = {
-    {.right_keycode = KC_Y,     .left_keycode = KC_Z,    .up_keycode = KC_S,   .modifier = SWIPE_MODIFIER_CONTROL},
-    {.right_keycode = KC_PGDN,  .left_keycode = KC_PGUP, .up_keycode = KC_N,   .modifier = SWIPE_MODIFIER_CONTROL},
-    {.right_keycode = KC_RIGHT, .left_keycode = KC_LEFT, .up_keycode = KC_D,   .modifier = SWIPE_MODIFIER_CONTROL_GUI},
-    {.right_keycode = KC_F13,   .left_keycode = KC_F14,  .up_keycode = KC_F15, .modifier = SWIPE_MODIFIER_NONE},
-};
-
-static uint8_t swipe_layer = 0;
-
-static void draw_background(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-    qp_rect(display, x1, y1, x2, y2, hue_bg, sat_bg, val_bg, true);  // HSV: H=0, S=0, V=0 (黒色)
-}
 
 void draw_background_all(void) {
     qp_rect(display, 0, 0, TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, hue_bg, sat_bg, val_bg, true);  // HSV: H=0, S=0, V=0 (黒色)
@@ -148,114 +103,6 @@ static void update_lcd_layer_category_by_gesture(void) {
     }
 }
     
-static void change_swipe_layer(void) {
-    swipe_layer = (swipe_layer + 1) % SWIPE_PROFILE_COUNT;
-}
-
-const char* get_layer_name(uint8_t layer) {
-    switch (layer) {
-        case _BASE:
-            return "BASE";
-        case _MARK:
-            return "MARK ";
-        case _FUNC:
-            return "FUNC";
-        case _NUM:
-            return "NUM";
-        case _MOUSE:
-            return "MOUS";
-        case _CUSTOM:
-            return "CUST";
-        default:
-            return "UNKN";
-    }
-}
-
-void swipe_gesture_main_view_update(uint8_t current_layer) {
-    const char *layer_text = get_layer_name(current_layer);
-    uint16_t layer_text_width = qp_textwidth(noto11_font, layer_text);
-    draw_background(85, 110, 155, 130); 
-    qp_drawtext_recolor(display, 120 - layer_text_width / 2, 120 - noto11_font->line_height / 2, noto11_font, layer_text, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_flush(display);  
-} 
-
-void swipe_gesture_base_view_update(void) {
-    qp_donut(display, 120, 120, 117, 4, hue_main_color, sat_main_color, 50, val_main_color);
-    qp_donut(display, 120, 120, 114, 4, hue_main_color, sat_main_color, val_main_color, 50);
-    qp_circle(display, 90 , 190, 5, hue_sub_color, sat_sub_color, val_sub_color, false);
-    qp_circle(display, 110, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, false);
-    qp_circle(display, 130, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, false);
-    qp_circle(display, 150, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, false);
-}
-
-static void swipe_gesture_view_update(const swipe_view_config_t *view_config) {
-    uint8_t right_text_width = qp_textwidth(noto11_font, view_config->right_label);
-    uint8_t left_text_width = qp_textwidth(noto11_font, view_config->left_label);
-    uint8_t up_text_width = qp_textwidth(noto11_font, view_config->up_label);
-    uint8_t text_height = noto11_font->line_height;
-    draw_background(150, 120 - text_height / 2, 230, 120 + text_height / 2);
-    draw_background(10, 120 - text_height / 2, 90, 120 + text_height / 2);
-    draw_background(80, 40 - text_height / 2, 160, 40 + text_height / 2);
-    qp_drawtext_recolor(display, 190 - right_text_width / 2, 120 - text_height / 2, noto11_font, view_config->right_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_drawtext_recolor(display, 50 - left_text_width / 2, 120 - text_height / 2, noto11_font, view_config->left_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_drawtext_recolor(display, 120 - up_text_width / 2, 40 - text_height / 2, noto11_font, view_config->up_label, hue_main_color, sat_main_color, val_main_color, hue_bg, sat_bg, val_bg);
-    qp_circle(display, view_config->active_indicator_x, 190, 5, hue_sub_color, sat_sub_color, val_sub_color, true);
-    qp_circle(display, view_config->previous_indicator_x, 190, 4, hue_bg, sat_bg, val_bg, true);
-    qp_flush(display);
-}
-
-void swipe_gesture_layer_view_update(void){
-    if (swipe_layer < SWIPE_PROFILE_COUNT) {
-        swipe_gesture_view_update(&swipe_view_configs[swipe_layer]);
-    }
-}
-
-static void tap_swipe_keycode(uint8_t keycode, swipe_modifier_t modifier) {
-    if (modifier == SWIPE_MODIFIER_CONTROL || modifier == SWIPE_MODIFIER_CONTROL_GUI) {
-        register_code(KC_LCTL);
-    }
-    if (modifier == SWIPE_MODIFIER_CONTROL_GUI) {
-        register_code(KC_LGUI);
-    }
-
-    tap_code(keycode);
-
-    if (modifier == SWIPE_MODIFIER_CONTROL_GUI) {
-        unregister_code(KC_LGUI);
-    }
-    if (modifier == SWIPE_MODIFIER_CONTROL || modifier == SWIPE_MODIFIER_CONTROL_GUI) {
-        unregister_code(KC_LCTL);
-    }
-}
-
-static void swipe_gesture_process(void) {
-    if (swipe_layer >= SWIPE_PROFILE_COUNT) {
-        return;
-    }
-
-    if (gesture_id == CST816S_SLIDE_DOWN) {
-        change_swipe_layer();
-        swipe_gesture_layer_view_update();
-        return;
-    }
-
-    const swipe_action_config_t *action_config = &swipe_action_configs[swipe_layer];
-    switch (gesture_id) {
-        case CST816S_SLIDE_RIGHT:
-            tap_swipe_keycode(action_config->right_keycode, action_config->modifier);
-            break;
-        case CST816S_SLIDE_LEFT:
-            tap_swipe_keycode(action_config->left_keycode, action_config->modifier);
-            break;
-        case CST816S_SLIDE_UP:
-            tap_swipe_keycode(action_config->up_keycode, action_config->modifier);
-            break;
-        default:
-            break;
-    }
-
-}
-
 static void process_touch(void) {
     touch_signal = true;
     touch_signal_view_update = true;
@@ -302,7 +149,7 @@ static void process_gesture(void){
         break;
 
     case DISPLAY_MODE_SWIPE_GESTURE:
-        swipe_gesture_process();
+        swipe_gesture_process(display, noto11_font, gesture_id);
         break;   
 
     case DISPLAY_MODE_STATUS1:
@@ -452,9 +299,9 @@ void display_redraw(void) {
             break;
         case DISPLAY_MODE_SWIPE_GESTURE:
             draw_background_all();
-            swipe_gesture_layer_view_update();
-            swipe_gesture_base_view_update();
-            swipe_gesture_main_view_update(current_lcd_layer);
+            swipe_gesture_draw_profile(display, noto11_font);
+            swipe_gesture_draw_base(display);
+            swipe_gesture_draw_main(display, noto11_font, current_lcd_layer);
             break;
         case DISPLAY_MODE_KEY_MATRIX:
             draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);

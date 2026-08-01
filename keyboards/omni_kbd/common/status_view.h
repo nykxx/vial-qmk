@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "qp.h"
 #include "os_detection.h"
+#include "omni_layers.h"
 
 #define BTN_W   52
 #define BTN_H   26
@@ -13,15 +14,6 @@
 #define BAR_R   190
 #define BAR_Y1  175
 #define BAR_Y2  200
-
-enum keyboard_layers {
-    _BASE,
-    _MARK,
-    _FUNC,
-    _NUM,
-    _MOUSE,
-    _CUSTOM,
-};
 
 enum {
     COL0_X =  90,
