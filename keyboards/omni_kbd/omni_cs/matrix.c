@@ -138,7 +138,7 @@ void matrix_init_custom(void) {
     init_pins();
 }
 
-int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, point_t circles[], size_t num_circles, int radius) {
+static int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, const point_t circles[], size_t num_circles, int radius) {
     for (size_t i = 0; i < num_circles; i++) {
         int16_t dx = touch_x - circles[i].x;
         int16_t dy = touch_y - circles[i].y;
@@ -152,7 +152,7 @@ int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, point_t circle
 }
 
 
-bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, uint16_t touch_y) {
+static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, uint16_t touch_y) {
     uint8_t touched_index = check_touch_within_radius(touch_x, touch_y, circles, TOUCH_KEY_COUNT, TOUCH_KEY_RADIUS);
     if (touched_index != INVALID_TOUCH_INDEX) {
         if (touch_x <= TOUCH_LCD_WIDTH && touch_y <= TOUCH_LCD_HEIGHT) {
@@ -184,8 +184,6 @@ static bool read_touch(matrix_row_t current_matrix[]) {
     return false;
 }
 
-
-extern matrix_row_t matrix[MATRIX_ROWS];
 
 static uint16_t last_touch_time = 0;
 static bool last_matrix_state = false;

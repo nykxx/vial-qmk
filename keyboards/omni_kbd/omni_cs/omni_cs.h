@@ -42,6 +42,4 @@ enum custom_keycodes {
     KC_DP_STAT1,
 };
 
-extern point_t circles[6];
-extern uint16_t virtual_keycode[72];
-
+extern const point_t circles[6];
