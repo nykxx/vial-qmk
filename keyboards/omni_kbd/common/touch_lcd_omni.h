@@ -22,13 +22,13 @@ typedef enum {
 
 typedef struct {
     painter_image_handle_t *image;
-    int x;
-    int y;
+    int x_coordinate;
+    int y_coordinate;
 } ImagePosition;
 
 typedef struct {
-    int16_t x;
-    int16_t y;
+    int16_t x_coordinate;
+    int16_t y_coordinate;
 } point_t;
 
 extern painter_device_t display;
@@ -50,7 +50,8 @@ extern bool initial_touch_flag;
 extern bool touch_signal_view_update;
 extern uint16_t touch_repeat_interval;
 extern uint8_t gesture_id;
-const char *get_layer_name(uint8_t layer); 
+
+const char *get_layer_name(uint8_t layer);
 
 painter_image_handle_t* get_img_func(uint16_t keycode);
 painter_image_handle_t* get_layer_img_func(uint16_t layer_count);
@@ -62,5 +63,4 @@ void swipe_gesture_main_view_update(uint8_t current_layer);
 void process_touch_interrupt(void);
 void show_trackball_tuning_mode(void);
 void swipe_gesture_layer_view_update(void);
-void swipe_gesture_main_view_update(uint8_t current_layer);
 void swipe_gesture_base_view_update(void);

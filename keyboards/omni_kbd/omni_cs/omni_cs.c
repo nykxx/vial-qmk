@@ -238,9 +238,9 @@ static void show_startup_logo(void) {
     qp_flush(display);
 
     if (image_logo != NULL) {
-        int x = (TOUCH_LCD_WIDTH - image_logo->width) / 2;
-        int y = (TOUCH_LCD_HEIGHT - image_logo->height) / 2;
-        my_anim = qp_animate(display, x, y, image_logo);
+        int logo_x_coordinate = (TOUCH_LCD_WIDTH - image_logo->width) / 2;
+        int logo_y_coordinate = (TOUCH_LCD_HEIGHT - image_logo->height) / 2;
+        my_anim = qp_animate(display, logo_x_coordinate, logo_y_coordinate, image_logo);
         lcd_fast_res_time = timer_read();
     }
 }
@@ -249,10 +249,10 @@ static void initialize_lcd_layer_app_images(void) {
     for (int layer = 0; layer < LCD_LAYER_COUNT; layer++) {
         for (int category = 0; category < LCD_CATEGORY_COUNT; category++) {
             int layer_index = category + layer * LCD_CATEGORY_COUNT;
-            lcd_layer_app_images[category][layer][0] = (ImagePosition){get_layer_img_func(layer_index), home_point.x, home_point.y};
+            lcd_layer_app_images[category][layer][0] = (ImagePosition){get_layer_img_func(layer_index), home_point.x_coordinate, home_point.y_coordinate};
             for (int key = 0; key < LCD_KEYS_PER_LAYER; key++) {
                 int key_index = key + category * LCD_KEYS_PER_LAYER + layer * LCD_CATEGORY_COUNT * LCD_KEYS_PER_LAYER;
-                lcd_layer_app_images[category][layer][key + 1] = (ImagePosition){get_img_func(virtual_keycode[key_index]), circles[key].x, circles[key].y};
+                lcd_layer_app_images[category][layer][key + 1] = (ImagePosition){get_img_func(virtual_keycode[key_index]), circles[key].x_coordinate, circles[key].y_coordinate};
             }
         }
     }

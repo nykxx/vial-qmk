@@ -37,8 +37,8 @@ static void unselect_row(uint8_t row)
 
 static void unselect_rows(void)
 {
-    for(uint8_t x = 0; x < MATRIX_ROWS; x++) {
-        setPinInputHigh(row_pins[x]);
+    for(uint8_t row_index = 0; row_index < MATRIX_ROWS; row_index++) {
+        setPinInputHigh(row_pins[row_index]);
     }
 }
 
@@ -55,8 +55,8 @@ static void unselect_col(uint8_t col)
 
 static void unselect_cols(void)
 {
-    for(uint8_t x = 0; x < MATRIX_COLS; x++) {
-        setPinInputHigh(col_pins[x]);
+    for(uint8_t column_index = 0; column_index < MATRIX_COLS; column_index++) {
+        setPinInputHigh(col_pins[column_index]);
     }
 }
 
@@ -139,13 +139,12 @@ void matrix_init_custom(void) {
 }
 
 static int check_touch_within_radius(uint16_t touch_x, uint16_t touch_y, const point_t circles[], size_t num_circles, int radius) {
-    for (size_t i = 0; i < num_circles; i++) {
-        int16_t dx = touch_x - circles[i].x;
-        int16_t dy = touch_y - circles[i].y;
-        int distance = sqrt(dx * dx + dy * dy);
+    for (size_t circle_index = 0; circle_index < num_circles; circle_index++) {
+        int16_t delta_x = touch_x - circles[circle_index].x_coordinate;
+        int16_t delta_y = touch_y - circles[circle_index].y_coordinate;
+        int distance = sqrt(delta_x * delta_x + delta_y * delta_y);
         if (distance <= radius) {
-            // uprintf("circle index %d\n", i);
-            return i;
+            return circle_index;
         }
     }
     return INVALID_TOUCH_INDEX;

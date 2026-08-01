@@ -141,6 +141,7 @@ SRC += ../common/sleeping_view.c
 SRC += ../common/view_keymap.c
 SRC += ../common/trackball_omni.c
 SRC += ../common/config_omni.c
+SRC += ../common/touch_input.c
 SRC += ../common/touch_lcd_omni.c
 SRC += ../common/power_lcd.c
 SRC += ../common/status_view.c
