@@ -31,6 +31,8 @@
 
 bool matrix_changed = false;
 static bool tb_state = false;
+static trackball_scroll_state_t tb_scroll_state_r = {0};
+static trackball_scroll_state_t tb_scroll_state_l = {0};
 trackball_mode_t tb_mode_r = TRACKBALL_CURSOR;
 trackball_mode_t tb_mode_l = TRACKBALL_TAP;
 bool is_first_frame = true;  
@@ -173,13 +175,13 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     if (tb_mode_r == TRACKBALL_CURSOR){
         process_cursor_report(&mouse_report, report0, speed_adjust1, slope_factor1, 1, 1, 2);
     } else if (tb_mode_r == TRACKBALL_TAP) {
-        process_high_res_scroll_report(&mouse_report, report0, speed_adjust2, slope_factor2, 1, -1, 3);
+        process_high_res_scroll_report(&mouse_report, report0, &tb_scroll_state_r, speed_adjust2, slope_factor2, 1, -1, 3);
     }
 
     if (tb_mode_l == TRACKBALL_CURSOR){
         process_cursor_report(&mouse_report, report1, speed_adjust1, slope_factor1, -1, -1, 2);
     } else if (tb_mode_l == TRACKBALL_TAP) {
-        process_high_res_scroll_report(&mouse_report, report1, speed_adjust2, slope_factor2, -1, 1, 3);
+        process_high_res_scroll_report(&mouse_report, report1, &tb_scroll_state_l, speed_adjust2, slope_factor2, -1, 1, 3);
     }
 
     if (ENABLE_TOUCH_UPDATE == 1) {
