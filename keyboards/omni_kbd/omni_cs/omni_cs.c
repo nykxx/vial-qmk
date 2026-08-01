@@ -146,13 +146,13 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
         }
     } else if (display_mode ==  DISPLAY_MODE_KEY_MATRIX) {
         if (!get_auto_mouse_enable()) {
-            if(current_layer != pre_layer){
+            if(current_layer != pre_layer) {
                 draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
             }            
         } else {
-            if (current_layer != 3){
-                if(pre_layer !=  3){
-                    if(current_layer != pre_layer){
+            if (current_layer !=  _MOUSE) {
+                if (pre_layer !=  _MOUSE) {
+                    if (current_layer != pre_layer) {
                         draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
                     }
                 }

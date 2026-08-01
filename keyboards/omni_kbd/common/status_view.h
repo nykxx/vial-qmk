@@ -17,8 +17,10 @@
 enum keyboard_layers {
     _BASE,
     _SUB,
+    _MARK,
+    _FUNC,
     _NUM,
-    _SYMBOL,
+    _MOUSE,
     _CUSTOM,
 };
 
