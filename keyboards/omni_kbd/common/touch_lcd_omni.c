@@ -178,8 +178,6 @@ const char* get_layer_name(uint8_t layer) {
     switch (layer) {
         case _BASE:
             return "BASE";
-        case _SUB:
-            return "SUB ";
         case _MARK:
             return "MARK ";
         case _FUNC:

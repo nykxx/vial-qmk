@@ -16,7 +16,6 @@
 
 enum keyboard_layers {
     _BASE,
-    _SUB,
     _MARK,
     _FUNC,
     _NUM,

@@ -41,7 +41,7 @@ static inline uint8_t layer_for_os(os_variant_t os) {
     switch (os) {
         case OS_MACOS:
         case OS_IOS:
-            return _SUB;
+            return _BASE;
 
         case OS_WINDOWS:
         case OS_LINUX:
@@ -65,7 +65,7 @@ static const char *const os_name_tbl[] = {
 
 const char *os_name_short(os_variant_t os) {
     if (!is_on_aos) {
-        return (get_highest_layer(default_layer_state) == _SUB) ? "Sub" : "Bas";
+        return (get_highest_layer(default_layer_state) == _BASE) ? "Sub" : "Bas";
     }
     if (os < 0 || os >= 5) return "???";
     return os_name_tbl[os];
@@ -101,7 +101,7 @@ static int8_t  sel_idx = -1;
 #define IDX_TOC 4
 
 static uint8_t g_default_layer = _BASE;
-static inline bool is_sub_layer(void) { return g_default_layer == _SUB; }
+static inline bool is_sub_layer(void) { return g_default_layer == _BASE; }
 
 static inline prof_index_t current_profile_index(void) {
     return is_sub_layer() ? PROF_SUB : PROF_BASE;
@@ -346,7 +346,7 @@ void ui_handle_touch(painter_device_t dev, painter_font_handle_t font, int16_t t
         if (point_in_rect(tx, ty, l, t, r, b)) {
             if (!is_on_aos) {
                 uint8_t curL = get_highest_layer(default_layer_state);
-                uint8_t nxtL = (curL == _BASE) ? _SUB : _BASE;
+                uint8_t nxtL = (curL == _BASE) ? _BASE : _BASE;
                 default_layer_set(1UL << nxtL);
                 g_default_layer = nxtL;
                 load_params_from_prms();
