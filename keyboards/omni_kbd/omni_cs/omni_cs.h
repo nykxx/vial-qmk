@@ -1,0 +1,48 @@
+#pragma once
+
+#include "quantum.h"
+#include <stdint.h>
+#include "../drivers/cst816t.h"
+#include "../common/touch_lcd_omni.h"
+
+#define ENABLE_TOUCH_UPDATE   1 
+#define SLEEPING_KB_TIME      60000
+#define SLEEP_VIEW            1 // 1: code rain
+
+typedef enum {
+    TRACKBALL_CURSOR = 0,
+    TRACKBALL_TAP    = 1,
+} trackball_mode_t;
+
+enum custom_keycodes {
+    KC_hue_bg_UP = QK_KB_0,
+    KC_hue_bg_DOWN,
+    KC_sat_bg_UP,
+    KC_sat_bg_DOWN,
+    KC_val_bg_UP,
+    KC_val_bg_DOWN,
+    KC_hue_main_color_UP,
+    KC_hue_main_color_DOWN,
+    KC_sat_main_color_UP,
+    KC_sat_main_color_DOWN,
+    KC_val_main_color_UP,
+    KC_val_main_color_DOWN,
+    KC_hue_sub_color_UP,
+    KC_hue_sub_color_DOWN,
+    KC_sat_sub_color_UP,
+    KC_sat_sub_color_DOWN,
+    KC_val_sub_color_UP,
+    KC_val_sub_color_DOWN,
+    AUTO_MOUSE_TOGGLE,
+    TB_R_MODE_TOGGLE,
+    TB_L_MODE_TOGGLE,
+    TB_UD_SC_MODE_TOGGLE,
+    TB_LR_SC_MODE_TOGGLE,
+    KC_DP_TOUCH_KEY,
+    KC_DP_TB_TUNE,
+    KC_DP_SWIPE_GESTURE,
+    KC_DP_KEY_MAT,
+};
+
+extern point_t circles[6];
+extern uint16_t virtual_keycode[72];
