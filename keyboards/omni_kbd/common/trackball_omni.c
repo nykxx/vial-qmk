@@ -66,9 +66,17 @@ static bool is_same_direction(float a, float b) {
     return (a > 0.0f && b > 0.0f) || (a < 0.0f && b < 0.0f);
 }
 
-static bool update_scroll_inertia_h(trackball_scroll_state_t *scroll_state, float h) {
+static void clear_scroll_inertia(trackball_scroll_state_t *scroll_state) {
+    scroll_state->inertia_h = 0.0f;
+    scroll_state->inertia_v = 0.0f;
+    scroll_state->active_axis = TRACKBALL_SCROLL_AXIS_NONE;
+}
+
+static void update_scroll_inertia_h(trackball_scroll_state_t *scroll_state, float h) {
     float next_h = clamp_abs_float(h * OMNI_SCROLL_INERTIA_GAIN, OMNI_SCROLL_INERTIA_MAX);
-    if (scroll_state->active_axis == TRACKBALL_SCROLL_AXIS_V && fabs(next_h) < fabs(scroll_state->inertia_v) * OMNI_SCROLL_INERTIA_AXIS_SWITCH_RATIO) return false;
+    if (scroll_state->active_axis == TRACKBALL_SCROLL_AXIS_V) {
+        if (fabs(h) >= OMNI_SCROLL_INERTIA_MIN_INPUT) clear_scroll_inertia(scroll_state);
+    }
 
     if (fabs(h) >= OMNI_SCROLL_INERTIA_START_INPUT) {
         if (scroll_state->active_axis != TRACKBALL_SCROLL_AXIS_H || !is_same_direction(scroll_state->inertia_h, next_h) || fabs(next_h) > fabs(scroll_state->inertia_h)) {
@@ -78,12 +86,13 @@ static bool update_scroll_inertia_h(trackball_scroll_state_t *scroll_state, floa
         scroll_state->active_axis = TRACKBALL_SCROLL_AXIS_H;
         scroll_state->last_inertia_timer = timer_read();
     }
-    return true;
 }
 
-static bool update_scroll_inertia_v(trackball_scroll_state_t *scroll_state, float v) {
+static void update_scroll_inertia_v(trackball_scroll_state_t *scroll_state, float v) {
     float next_v = clamp_abs_float(v * OMNI_SCROLL_INERTIA_GAIN, OMNI_SCROLL_INERTIA_MAX);
-    if (scroll_state->active_axis == TRACKBALL_SCROLL_AXIS_H && fabs(next_v) < fabs(scroll_state->inertia_h) * OMNI_SCROLL_INERTIA_AXIS_SWITCH_RATIO) return false;
+    if (scroll_state->active_axis == TRACKBALL_SCROLL_AXIS_H) {
+        if (fabs(v) >= OMNI_SCROLL_INERTIA_MIN_INPUT) clear_scroll_inertia(scroll_state);
+    }
 
     if (fabs(v) >= OMNI_SCROLL_INERTIA_START_INPUT) {
         if (scroll_state->active_axis != TRACKBALL_SCROLL_AXIS_V || !is_same_direction(scroll_state->inertia_v, next_v) || fabs(next_v) > fabs(scroll_state->inertia_v)) {
@@ -93,7 +102,6 @@ static bool update_scroll_inertia_v(trackball_scroll_state_t *scroll_state, floa
         scroll_state->active_axis = TRACKBALL_SCROLL_AXIS_V;
         scroll_state->last_inertia_timer = timer_read();
     }
-    return true;
 }
 
 static void apply_scroll_inertia(trackball_scroll_state_t *scroll_state) {
@@ -133,13 +141,11 @@ void process_high_res_scroll_report(report_mouse_t *mouse_report, pmw33xx_report
         if (ratio > diagonal_limit && ratio < (1.0f / diagonal_limit)) {
             // Keep the last strong inertia; diagonal tail noise should not consume it.
         } else if (ratio <= diagonal_limit) {
-            if (update_scroll_inertia_h(scroll_state, x_corr)) {
-                scroll_state->accumulated_h += x_corr;
-            }
+            update_scroll_inertia_h(scroll_state, x_corr);
+            scroll_state->accumulated_h += x_corr;
         } else {
-            if (update_scroll_inertia_v(scroll_state, y_corr)) {
-                scroll_state->accumulated_v += y_corr;
-            }
+            update_scroll_inertia_v(scroll_state, y_corr);
+            scroll_state->accumulated_v += y_corr;
         }
     } else {
         apply_scroll_inertia(scroll_state);
