@@ -206,7 +206,7 @@ static void load_persistent_config(void) {
     }
     load_omni_tb_config();
     load_omni_color_config();
-    persist_load_all();
+    status_view_load_persistent_state();
 }
 
 static void initialize_display(void) {
@@ -282,7 +282,7 @@ void keyboard_post_init_kb(void) {
     initialize_touch_controller();
     show_startup_logo();
     wait_ms(STARTUP_SETTLE_MS);
-    sync_default_layer_to_os();
+    status_view_sync_default_layer_to_os();
 }
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
@@ -424,7 +424,7 @@ void __wrap_dynamic_keymap_set_keycode(uint8_t layer, uint8_t row, uint8_t col, 
         update_lcd_view_data();
         load_omni_tb_config();
         load_omni_color_config();
-        persist_load_all();
+        status_view_load_persistent_state();
         display_set_mode(DISPLAY_MODE_TOUCH_KEY);
     }
 }

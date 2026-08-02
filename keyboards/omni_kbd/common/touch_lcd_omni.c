@@ -39,7 +39,7 @@ static void process_touch_event(const touch_gesture_event_t *event, const omni_d
             swipe_gesture_process(context->device, context->interface_font, event->gesture_id);
             break;
         case DISPLAY_MODE_STATUS1:
-            ui_handle_touch(context->device, context->status_font, event->x, event->y);
+            status_view_handle_touch(context->device, context->status_font, event->x, event->y);
             break;
         default:
             break;
