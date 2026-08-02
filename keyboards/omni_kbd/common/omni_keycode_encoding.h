@@ -15,10 +15,13 @@ enum {
     OMNI_VIAL_VALUE_KEYCODE_BASE = 0x7700,
 };
 
-#define OMNI_MACRO_KEYCODE(macro_index) ((uint16_t)(OMNI_VIAL_VALUE_KEYCODE_BASE + (macro_index)))
+#define OMNI_ENCODED_VALUE(value) ((uint16_t)(OMNI_VIAL_VALUE_KEYCODE_BASE + (value)))
+#define OMNI_MACRO_KEYCODE(macro_index) OMNI_ENCODED_VALUE(macro_index)
+#define OMNI_ICON_KEYCODE(icon_index) OMNI_ENCODED_VALUE(icon_index)
+#define OMNI_STORED_VALUE_KEYCODE(value) OMNI_ENCODED_VALUE(value)
 
 static inline uint16_t omni_stored_value_encode(uint16_t value) {
-    return OMNI_VIAL_VALUE_KEYCODE_BASE + value;
+    return OMNI_STORED_VALUE_KEYCODE(value);
 }
 
 static inline int32_t omni_stored_value_decode(uint16_t keycode) {

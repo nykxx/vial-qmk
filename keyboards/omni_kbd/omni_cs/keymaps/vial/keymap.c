@@ -15,19 +15,13 @@ enum {
     LEGACY_AUTO_MOUSE_CONFIG_COLUMN = 0,
 };
 
-#define OMNI_DEFAULT_TOUCH_KEYCODES \
-    OMNI_MACRO_KEYCODE(0),  OMNI_MACRO_KEYCODE(1),  OMNI_MACRO_KEYCODE(2),  OMNI_MACRO_KEYCODE(3),  OMNI_MACRO_KEYCODE(4),  OMNI_MACRO_KEYCODE(5),  \
-    OMNI_MACRO_KEYCODE(6),  OMNI_MACRO_KEYCODE(7),  OMNI_MACRO_KEYCODE(8),  OMNI_MACRO_KEYCODE(9),  OMNI_MACRO_KEYCODE(10), OMNI_MACRO_KEYCODE(11), \
-    OMNI_MACRO_KEYCODE(12), OMNI_MACRO_KEYCODE(13), OMNI_MACRO_KEYCODE(14), OMNI_MACRO_KEYCODE(15), OMNI_MACRO_KEYCODE(16), OMNI_MACRO_KEYCODE(17), \
-    OMNI_MACRO_KEYCODE(18), OMNI_MACRO_KEYCODE(19), OMNI_MACRO_KEYCODE(20), OMNI_MACRO_KEYCODE(21), OMNI_MACRO_KEYCODE(22), OMNI_MACRO_KEYCODE(23), \
-    OMNI_MACRO_KEYCODE(24), OMNI_MACRO_KEYCODE(25), OMNI_MACRO_KEYCODE(26), OMNI_MACRO_KEYCODE(27), OMNI_MACRO_KEYCODE(28), OMNI_MACRO_KEYCODE(29), \
-    OMNI_MACRO_KEYCODE(30), OMNI_MACRO_KEYCODE(31), OMNI_MACRO_KEYCODE(32), OMNI_MACRO_KEYCODE(33), OMNI_MACRO_KEYCODE(34), OMNI_MACRO_KEYCODE(35), \
-    OMNI_MACRO_KEYCODE(36), OMNI_MACRO_KEYCODE(37), OMNI_MACRO_KEYCODE(38), OMNI_MACRO_KEYCODE(39), OMNI_MACRO_KEYCODE(40), OMNI_MACRO_KEYCODE(41), \
-    OMNI_MACRO_KEYCODE(42), OMNI_MACRO_KEYCODE(43), OMNI_MACRO_KEYCODE(44), OMNI_MACRO_KEYCODE(45), OMNI_MACRO_KEYCODE(46), OMNI_MACRO_KEYCODE(47), \
-    OMNI_MACRO_KEYCODE(48), OMNI_MACRO_KEYCODE(49), OMNI_MACRO_KEYCODE(50), OMNI_MACRO_KEYCODE(51), OMNI_MACRO_KEYCODE(52), OMNI_MACRO_KEYCODE(53), \
-    OMNI_MACRO_KEYCODE(54), OMNI_MACRO_KEYCODE(55), OMNI_MACRO_KEYCODE(56), OMNI_MACRO_KEYCODE(57), OMNI_MACRO_KEYCODE(58), OMNI_MACRO_KEYCODE(59), \
-    OMNI_MACRO_KEYCODE(60), OMNI_MACRO_KEYCODE(61), OMNI_MACRO_KEYCODE(62), OMNI_MACRO_KEYCODE(63), OMNI_MACRO_KEYCODE(64), OMNI_MACRO_KEYCODE(65), \
-    OMNI_MACRO_KEYCODE(66), OMNI_MACRO_KEYCODE(67), OMNI_MACRO_KEYCODE(68), OMNI_MACRO_KEYCODE(69), OMNI_MACRO_KEYCODE(70), OMNI_MACRO_KEYCODE(71)
+#define OMNI_TRANSPARENT_ROW _______, _______, _______, _______, _______, _______
+#define OMNI_NO_KEY_ROW KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO
+
+#define OMNI_UNUSED_RIGHT_ROWS \
+    OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, \
+    OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, \
+    OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW
 
 /* Expand grouped keycode lists before LAYOUT counts its arguments. */
 #define OMNI_LAYOUT(...) LAYOUT(__VA_ARGS__)
@@ -114,162 +108,92 @@ void pointing_device_init_user(void) {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = OMNI_LAYOUT(
-        KC_ESC,  KC_Q,    KC_W,    KC_E,     KC_R,    KC_T,                                     KC_Y,          KC_U,      KC_I,    KC_O,    KC_P,    KC_MINUS,
-        KC_LSFT, KC_A,    KC_S,    KC_D,     KC_F,    KC_G,                                     KC_H,          KC_J,      KC_K,    KC_L,    KC_SCLN, KC_BSPC,
-        KC_LCTL, KC_Z,    KC_X,    KC_C,     KC_V,    KC_B,                                     KC_N,          KC_M,      KC_COMM, KC_DOT,  KC_SLSH, KC_INT1,
-        KC_TAB,  KC_LNG1, KC_LNG2, KC_LALT,  KC_BTN2, KC_BTN3, KC_BTN1,           LT(2,KC_SPC), LT(3,KC_ENT),  _______,                              LT(4,KC_SPC),
-        KC_LGUI,     
-        OMNI_DEFAULT_TOUCH_KEYCODES,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______,
-        _______,	_______,	_______,	_______,	_______,	_______
+        KC_ESC,          KC_Q,     KC_L,     KC_U,     KC_COMM, LT(3, KC_DOT),                       KC_F,  KC_W, KC_R, KC_Y, KC_P, KC_SLSH,
+        LCTL_T(KC_TAB),  KC_E,     KC_I,     KC_A,     KC_O,    KC_MINS,                             KC_K,  KC_T, KC_N, KC_S, KC_H, RCTL_T(KC_QUOT),
+        KC_LSFT,         KC_J,     KC_X,     KC_C,     KC_V,    KC_EQL,                              KC_G,  KC_D, KC_M, KC_Z, KC_B, RSFT_T(KC_SCLN),
+        LALT_T(KC_F14),  KC_LGUI,  KC_BTN2,  KC_BTN3,  KC_BTN1, LT(2, KC_SPC),  LT(1, KC_SPC), LT(1, KC_ENT), LT(2, KC_BSPC), _______, RALT_T(KC_F13),
+        MO(_CUSTOM),
+        KC_PSCR, KC_CALC, OMNI_MACRO_KEYCODE(0), LGUI(KC_TAB), LCTL(KC_WH_D), LCTL(KC_WH_U),
+        KC_CAPS, OMNI_MACRO_KEYCODE(7), OMNI_MACRO_KEYCODE(8), OMNI_MACRO_KEYCODE(9), OMNI_MACRO_KEYCODE(10), OMNI_MACRO_KEYCODE(11),
+        OMNI_MACRO_KEYCODE(12), OMNI_MACRO_KEYCODE(13), OMNI_MACRO_KEYCODE(14), OMNI_MACRO_KEYCODE(15), OMNI_MACRO_KEYCODE(16), OMNI_MACRO_KEYCODE(17),
+        OMNI_MACRO_KEYCODE(18), OMNI_MACRO_KEYCODE(19), OMNI_MACRO_KEYCODE(20), OMNI_MACRO_KEYCODE(21), OMNI_MACRO_KEYCODE(22), OMNI_MACRO_KEYCODE(23),
+        OMNI_MACRO_KEYCODE(24), OMNI_MACRO_KEYCODE(25), OMNI_MACRO_KEYCODE(26), OMNI_MACRO_KEYCODE(27), OMNI_MACRO_KEYCODE(28), OMNI_MACRO_KEYCODE(29),
+        OMNI_MACRO_KEYCODE(30), OMNI_MACRO_KEYCODE(31), OMNI_MACRO_KEYCODE(32), OMNI_MACRO_KEYCODE(33), OMNI_MACRO_KEYCODE(34), OMNI_MACRO_KEYCODE(35),
+        OMNI_NO_KEY_ROW,
+        OMNI_MACRO_KEYCODE(42), OMNI_MACRO_KEYCODE(43), OMNI_MACRO_KEYCODE(44), OMNI_MACRO_KEYCODE(45), OMNI_MACRO_KEYCODE(46), OMNI_MACRO_KEYCODE(47),
+        OMNI_MACRO_KEYCODE(48), OMNI_MACRO_KEYCODE(49), OMNI_MACRO_KEYCODE(50), OMNI_MACRO_KEYCODE(51), OMNI_MACRO_KEYCODE(52), OMNI_MACRO_KEYCODE(53),
+        OMNI_MACRO_KEYCODE(54), OMNI_MACRO_KEYCODE(55), OMNI_MACRO_KEYCODE(56), OMNI_MACRO_KEYCODE(57), OMNI_MACRO_KEYCODE(58), OMNI_MACRO_KEYCODE(59),
+        OMNI_MACRO_KEYCODE(60), OMNI_MACRO_KEYCODE(61), OMNI_MACRO_KEYCODE(62), OMNI_MACRO_KEYCODE(63), OMNI_MACRO_KEYCODE(64), OMNI_MACRO_KEYCODE(65),
+        OMNI_MACRO_KEYCODE(66), OMNI_MACRO_KEYCODE(67), OMNI_MACRO_KEYCODE(68), OMNI_MACRO_KEYCODE(69), OMNI_MACRO_KEYCODE(70), OMNI_MACRO_KEYCODE(71),
+        OMNI_UNUSED_RIGHT_ROWS
     ),
     [_MARK] = OMNI_LAYOUT(
-        _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
-        _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
-        _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
-        _______,    _______,   _______,  _______,   _______,  _______, _______,     _______,  _______,  _______,                              _______,
-        _______,   
-        OMNI_DEFAULT_TOUCH_KEYCODES,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______
-
-
+        _______, KC_1, KC_2, KC_3, KC_4, KC_5,                          LSFT(KC_6), LSFT(KC_7), LSFT(KC_8), KC_SLSH, LSFT(KC_SLSH), LSFT(KC_SLSH),
+        _______, KC_GRV, KC_LBRC, KC_RBRC, LSFT(KC_COMM), LSFT(KC_DOT), LSFT(KC_SCLN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, LSFT(KC_QUOT),
+        _______, LSFT(KC_MINS), LSFT(KC_LBRC), LSFT(KC_RBRC), LSFT(KC_9), LSFT(KC_0), KC_GRV, LSFT(KC_GRV), KC_BSLS, LSFT(KC_BSLS), KC_QUOT, KC_SCLN,
+        KC_F15, _______, _______, _______, _______, KC_F16,             KC_SPC, KC_ENT, KC_DEL, _______, _______,
+        _______,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_UNUSED_RIGHT_ROWS
     ),
     [_FUNC] = OMNI_LAYOUT(
-        _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
-        _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
-        _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
-        _______,    _______,   _______,  _______,   _______,  _______, _______,     _______,  _______,  _______,                              _______,
-        _______,   
-        OMNI_DEFAULT_TOUCH_KEYCODES,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______,
-        _______,    _______,    _______,  _______,    _______,   _______
-
-
+        _______, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,                     KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11,
+        _______, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                     KC_HOME, LCTL(LGUI(KC_LEFT)), KC_NO, KC_NO, LCTL(LGUI(KC_RIGHT)), KC_F12,
+        _______, LCTL(KC_Z), LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), LGUI(KC_V), KC_END, SGUI(KC_LEFT), LCTL(LGUI(KC_D)), LCTL(LGUI(KC_F4)), SGUI(KC_RIGHT), KC_PSCR,
+        KC_F15, _______, _______, _______, _______, KC_F16,             _______, _______, _______, _______, _______,
+        _______,
+        OMNI_ICON_KEYCODE(41), OMNI_ICON_KEYCODE(36), OMNI_ICON_KEYCODE(26), OMNI_ICON_KEYCODE(38), OMNI_ICON_KEYCODE(55), OMNI_ICON_KEYCODE(54),
+        OMNI_ICON_KEYCODE(6), OMNI_ICON_KEYCODE(7), OMNI_ICON_KEYCODE(8), OMNI_ICON_KEYCODE(9), OMNI_ICON_KEYCODE(10), OMNI_ICON_KEYCODE(11),
+        OMNI_ICON_KEYCODE(12), OMNI_ICON_KEYCODE(13), OMNI_ICON_KEYCODE(14), OMNI_ICON_KEYCODE(15), OMNI_ICON_KEYCODE(16), OMNI_ICON_KEYCODE(17),
+        OMNI_ICON_KEYCODE(18), OMNI_ICON_KEYCODE(19), OMNI_ICON_KEYCODE(20), OMNI_ICON_KEYCODE(21), OMNI_ICON_KEYCODE(22), OMNI_ICON_KEYCODE(23),
+        OMNI_ICON_KEYCODE(24), OMNI_ICON_KEYCODE(25), OMNI_ICON_KEYCODE(26), OMNI_ICON_KEYCODE(27), OMNI_ICON_KEYCODE(28), OMNI_ICON_KEYCODE(29),
+        OMNI_ICON_KEYCODE(30), OMNI_ICON_KEYCODE(31), OMNI_ICON_KEYCODE(32), OMNI_ICON_KEYCODE(33), OMNI_ICON_KEYCODE(34), OMNI_ICON_KEYCODE(35),
+        OMNI_ICON_KEYCODE(36), OMNI_ICON_KEYCODE(37), OMNI_ICON_KEYCODE(38), OMNI_ICON_KEYCODE(39), OMNI_ICON_KEYCODE(40), OMNI_ICON_KEYCODE(41),
+        OMNI_ICON_KEYCODE(42), OMNI_ICON_KEYCODE(43), OMNI_ICON_KEYCODE(44), OMNI_ICON_KEYCODE(45), OMNI_ICON_KEYCODE(46), OMNI_ICON_KEYCODE(47),
+        OMNI_ICON_KEYCODE(48), OMNI_ICON_KEYCODE(49), OMNI_ICON_KEYCODE(50), OMNI_ICON_KEYCODE(51), OMNI_ICON_KEYCODE(52), OMNI_ICON_KEYCODE(53),
+        OMNI_ICON_KEYCODE(54), OMNI_ICON_KEYCODE(55), OMNI_ICON_KEYCODE(56), OMNI_ICON_KEYCODE(57), OMNI_ICON_KEYCODE(58), OMNI_ICON_KEYCODE(59),
+        OMNI_ICON_KEYCODE(60), OMNI_ICON_KEYCODE(61), OMNI_ICON_KEYCODE(62), OMNI_ICON_KEYCODE(63), OMNI_ICON_KEYCODE(64), OMNI_ICON_KEYCODE(65),
+        OMNI_ICON_KEYCODE(66), OMNI_ICON_KEYCODE(67), OMNI_ICON_KEYCODE(68), OMNI_ICON_KEYCODE(69), OMNI_ICON_KEYCODE(70), OMNI_ICON_KEYCODE(71),
+        OMNI_UNUSED_RIGHT_ROWS
     ),
     [_NUM] = OMNI_LAYOUT(
-        _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
-        _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
-        _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
-        _______,    _______,   _______,  _______,   _______,  _______, _______,     _______,  _______,  _______,                              _______,
-        _______,   
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______
-
-
+        KC_NUM, KC_P1, KC_P2, KC_P3, KC_P4, KC_P5,                     KC_PAST, KC_P7, KC_P8, KC_P9, KC_PPLS, KC_NO,
+        _______, KC_P4, KC_P5, KC_P6, KC_P7, KC_P8,                    KC_PSLS, KC_P4, KC_P5, KC_P6, KC_PMNS, KC_NO,
+        _______, KC_P9, LSFT(KC_LBRC), LSFT(KC_RBRC), LSFT(KC_9), LSFT(KC_0), KC_NO, KC_P1, KC_P2, KC_P3, KC_NO, KC_DOT,
+        _______, _______, _______, _______, _______, _______,           _______, _______, KC_P0, _______, KC_DOT,
+        _______,
+        OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(0), _______, _______, _______,
+        OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(254), OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(0), OMNI_STORED_VALUE_KEYCODE(254),
+        OMNI_TRANSPARENT_ROW,
+        OMNI_STORED_VALUE_KEYCODE(12), OMNI_STORED_VALUE_KEYCODE(75), OMNI_STORED_VALUE_KEYCODE(14), OMNI_STORED_VALUE_KEYCODE(80), _______, _______,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_UNUSED_RIGHT_ROWS
     ),
     [_MOUSE] = OMNI_LAYOUT(
-        _______,  KC_NO,   KC_NO,    KC_UP,    KC_NO,     KC_NO,                          LSFT(KC_1),   LSFT(KC_SLSH), LSFT(KC_8),    LSFT(KC_9),    LSFT(KC_5),    LSFT(KC_EQL),
-        _______,  KC_NO,   KC_LEFT,  KC_DOWN,  KC_RIGHT,  KC_NO,                          LSFT(KC_6),   LSFT(KC_INT3), KC_RBRC,       KC_NUHS,       KC_QUOT,       LSFT(KC_2),
-        _______,  KC_NO,   KC_NO,    KC_NO,    KC_NO,     KC_NO,                          LSFT(KC_3),   KC_LBRC,       LSFT(KC_RBRC), LSFT(KC_NUHS), LSFT(KC_LBRC), LSFT(KC_7),
-        _______,  _______, _______,  _______,  _______,   _______,  _______,     _______, _______,      _______,                                                    LSFT(KC_4),
+        TO(_BASE), _______, _______, _______, _______, _______,          _______, _______, _______, _______, KC_BTN4, KC_BTN5,
+        _______, _______, _______, _______, _______, _______,           _______, _______, _______, KC_BTN1, KC_BTN3, KC_BTN2,
+        _______, _______, _______, _______, _______, _______,           _______, _______, _______, KC_BTN1, KC_BTN3, KC_BTN2,
+        _______, _______, KC_BTN2, KC_BTN3, KC_BTN1, _______,           _______, _______, _______, _______, _______,
         _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______
+        OMNI_STORED_VALUE_KEYCODE(1), OMNI_STORED_VALUE_KEYCODE(0), _______, _______, _______, _______,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_STORED_VALUE_KEYCODE(1), OMNI_STORED_VALUE_KEYCODE(1), OMNI_STORED_VALUE_KEYCODE(1), OMNI_STORED_VALUE_KEYCODE(1), OMNI_STORED_VALUE_KEYCODE(1), _______,
+        OMNI_TRANSPARENT_ROW, OMNI_TRANSPARENT_ROW,
+        OMNI_UNUSED_RIGHT_ROWS
     ),
     [_CUSTOM] = OMNI_LAYOUT(
-        KC_hue_bg_UP        , KC_hue_bg_DOWN        , KC_sat_bg_UP        , KC_sat_bg_DOWN        , KC_val_bg_UP         , KC_val_bg_DOWN        ,      KC_DP_TOUCH_KEY, KC_DP_TB_TUNE, KC_DP_SWIPE_GESTURE, KC_DP_KEY_MAT, KC_DP_STAT1, _______,
-        KC_hue_main_color_UP, KC_hue_main_color_DOWN, KC_sat_main_color_UP, KC_sat_main_color_DOWN,  KC_val_main_color_UP, KC_val_main_color_DOWN,      _______, KC_BTN1, KC_BTN3, KC_BTN2, TB_R_MODE_TOGGLE, _______,
-        KC_hue_sub_color_UP , KC_hue_sub_color_DOWN , KC_sat_sub_color_UP , KC_sat_sub_color_DOWN , KC_val_sub_color_UP  , KC_val_sub_color_DOWN ,      _______, _______, _______, _______, _______, _______,
-        _______             , _______               , _______             , _______               , _______              , _______               ,      _______, _______, _______, _______, _______,
-        _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______
-    )
+        OMNI_NO_KEY_ROW,                                                 KC_DP_TOUCH_KEY, KC_DP_TB_TUNE, KC_DP_SWIPE_GESTURE, KC_DP_KEY_MAT, KC_DP_STAT1, KC_NO,
+        OMNI_NO_KEY_ROW,                                                 OMNI_NO_KEY_ROW,
+        OMNI_NO_KEY_ROW,                                                 OMNI_NO_KEY_ROW,
+        OMNI_NO_KEY_ROW,                                                 KC_NO, KC_NO, KC_NO, _______, KC_NO,
+        KC_NO,
+        OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW,
+        OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW,
+        OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW, OMNI_NO_KEY_ROW,
+        OMNI_UNUSED_RIGHT_ROWS
+    ),
 };

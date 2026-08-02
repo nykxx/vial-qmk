@@ -108,8 +108,9 @@ icon_index = keycode - 0x7700;
 | `0x7702` | 2 |
 | `0x7747` | 71 |
 
-この互換表現は`../common/omni_keycode_encoding.h`で
-`omni_icon_index_from_keycode()`として名前を付けている。
+この互換表現は`../common/omni_keycode_encoding.h`で、初期キーマップに設定する側を
+`OMNI_ICON_KEYCODE()`、画像番号へ戻す側を`omni_icon_index_from_keycode()`として
+用途別に名前を付けている。
 
 ### 3. 現在のページとカテゴリを描画する
 
@@ -229,4 +230,3 @@ Vialがdynamic keymapを書き換えた場合は、`omni_cs.c`の
   可能性がある。必要に応じて実行対象レイヤーの同じ座標も確認する。
 - `0x7700 + N`には、アイコン番号とVialマクロ番号という異なる意味がある。
   新しい処理では`omni_keycode_encoding.h`の用途別APIを使い、数値を直接演算しない。
-
