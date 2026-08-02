@@ -20,6 +20,9 @@ enum {
     OMNI_TOUCH_KEY_DISPLAY_LAYER    = _FUNC,
 };
 
+_Static_assert(OMNI_TOUCH_KEY_MATRIX_ROW_START + OMNI_TOUCH_KEY_MATRIX_ROW_COUNT <= MATRIX_ROWS,
+               "LCD touch-key rows must fit in the QMK matrix");
+
 static inline uint8_t omni_touch_key_virtual_row(uint8_t page, uint8_t category) {
     return page * OMNI_TOUCH_KEY_CATEGORY_COUNT + category;
 }

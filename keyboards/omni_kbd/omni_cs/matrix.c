@@ -19,6 +19,13 @@
 static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
 static const pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
 
+/*
+ * QMK's debounced matrix is defined in quantum/matrix_common.c but has no
+ * public setter. Touch keys update it directly so they retain the original
+ * no-debounce pulse timing without relying on adjacent array placement.
+ */
+extern matrix_row_t matrix[MATRIX_ROWS];
+
 enum {
     PHYSICAL_MATRIX_ROWS = MATRIX_ROWS / 2,
 };
@@ -141,13 +148,7 @@ static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, 
     uint8_t virtual_row;
     uint8_t virtual_column;
     if (touch_key_view_locate_key(touch_x, touch_y, &virtual_row, &virtual_column)) {
-        /*
-         * Legacy behavior: adding MATRIX_ROWS aliases QMK's cooked matrix and
-         * bypasses debounce for touch keys. This is an out-of-bounds access
-         * and must be replaced separately after establishing equivalent input
-         * timing on hardware.
-         */
-        *row = MATRIX_ROWS + omni_touch_key_matrix_row(virtual_row);
+        *row = omni_touch_key_matrix_row(virtual_row);
         *col = virtual_column;
         return true;
     }
@@ -156,7 +157,7 @@ static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, 
     return false;
 }
 
-static bool read_touch(matrix_row_t current_matrix[]) {
+static bool read_touch(void) {
     uint16_t touch_x;
     uint16_t touch_y;
     touch_gesture_get_key_position(&touch_x, &touch_y);
@@ -165,13 +166,13 @@ static bool read_touch(matrix_row_t current_matrix[]) {
     if (get_touch_coordinates(&row_index, &col_index, touch_x, touch_y)) {
         select_col(col_index);
         matrix_io_delay();
-        matrix_row_t last_row_value = current_matrix[row_index];
+        matrix_row_t last_row_value = matrix[row_index];
         if (touch_gesture_key_is_active()) {
-            current_matrix[row_index] |= (MATRIX_ROW_SHIFTER << col_index);
+            matrix[row_index] |= (MATRIX_ROW_SHIFTER << col_index);
         } else {
-            current_matrix[row_index] &= ~(MATRIX_ROW_SHIFTER << col_index);
+            matrix[row_index] &= ~(MATRIX_ROW_SHIFTER << col_index);
         }
-        bool matrix_changed = last_row_value != current_matrix[row_index];
+        bool matrix_changed = last_row_value != matrix[row_index];
         unselect_col(col_index);
         return matrix_changed;
     }
@@ -206,7 +207,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
             touch_gesture_clear_key_position();
         }
         if (timer_elapsed(last_touch_time) > touch_gesture_repeat_interval()) {
-            if (read_touch(current_matrix)) {
+            if (read_touch()) {
                 changed = true;
                 last_touch_time = timer_read();
                 touch_signal_latch = false;
