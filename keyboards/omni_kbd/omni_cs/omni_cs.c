@@ -24,6 +24,7 @@
 #include "../common/status_view.h"
 #include "../common/swipe_gesture.h"
 #include "../common/trackball_tuning.h"
+#include "../common/touch_gesture.h"
 #include "../common/touch_key_view.h"
 #include "../drivers/pmw33xx_common.h"
 #include "../font/noto9.qff.h"
@@ -77,7 +78,7 @@ static void update_layer_display(void) {
 }
 
 static void update_touch_feedback(void) {
-    if (ENABLE_TOUCH_UPDATE != 1 || !touch_signal_view_update) {
+    if (ENABLE_TOUCH_UPDATE != 1 || !touch_gesture_feedback_pending()) {
         return;
     }
 
@@ -89,7 +90,7 @@ static void update_touch_feedback(void) {
     if (timer_elapsed(blink_start_time) >= LCD_BACKLIGHT_BLINK_MS) {
         writePinHigh(BLK_PIN);
         is_backlight_off = false;
-        touch_signal_view_update = false;
+        touch_gesture_clear_feedback();
     }
 }
 
@@ -335,7 +336,7 @@ void matrix_scan_user(void) {
 }
 
 static void sleeping_kb(bool matrix_changed) {
-    if (matrix_changed || tb_state || touch_start_flag){ 
+    if (matrix_changed || tb_state) {
         sleeping_timer = timer_read();
         if (sleeping_state) {
             if (!lcd_is_on){
@@ -381,13 +382,6 @@ void housekeeping_task_user(void) {
     bool matrix_changed = get_last_matrix_state();
     sleeping_kb(matrix_changed);
 
-    if (touch_start_flag) {
-        if (timer_elapsed(touch_start_timer) >= TOUCH_DEBOUNCE_TIME) {
-            touch_start_flag = false;
-            initial_touch_flag = false;
-            gesture_id = GESTURE_NONE;
-        }   
-    }
 }
 
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {

@@ -6,6 +6,7 @@
 #include "status_view.h"
 #include "draw_custom.h"
 #include "config_omni.h"
+#include "touch_gesture.h"
 #include "touch_lcd_omni.h"
 
 uint8_t hi_res_interval_v = 100;
@@ -14,8 +15,6 @@ uint8_t hi_res_interval_h = 100;
 uint8_t hi_res_value_h    = 100;
 int8_t ud_sc_mode_flag = 1;
 int8_t lr_sc_mode_flag = 1;
-uint16_t touch_repeat_interval = 70;
-uint16_t touch_single_interval = 400;
 
 static inline uint8_t clamp_u8(int16_t v, uint8_t lo, uint8_t hi) {
     if (v < lo) v = lo;
@@ -176,9 +175,9 @@ static inline void apply_to_param(uint8_t toggle_idx, bool is_upper_bar, uint8_t
             break;
         case IDX_TOC:
             if (is_upper_bar) {
-                touch_single_interval = 150 + (bar_x * (1500 - 150) / 100);
+                touch_gesture_set_hold_interval(150 + (bar_x * (1500 - 150) / 100));
             } else {
-                touch_repeat_interval = 40 + (bar_x * (150 - 40) / 100);
+                touch_gesture_set_repeat_interval(40 + (bar_x * (150 - 40) / 100));
             }
 
         default:
@@ -471,6 +470,5 @@ void sync_default_layer_to_os(void) {
     load_params_from_prms();
     
 }
-
 
 

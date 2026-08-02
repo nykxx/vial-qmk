@@ -143,6 +143,7 @@ SRC += ../common/view_keymap.c
 SRC += ../common/trackball_omni.c
 SRC += ../common/trackball_tuning.c
 SRC += ../common/config_omni.c
+SRC += ../common/touch_gesture.c
 SRC += ../common/touch_input.c
 SRC += ../common/touch_key_view.c
 SRC += ../common/touch_lcd_omni.c

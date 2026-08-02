@@ -12,6 +12,7 @@
 #include "omni_cs.h"
 #include "config.h"
 #include "timer.h"
+#include "../common/touch_gesture.h"
 #include "../common/touch_key_view.h"
 
 static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
@@ -149,12 +150,16 @@ static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, 
 }
 
 static bool read_touch(matrix_row_t current_matrix[]) {
+    uint16_t touch_x;
+    uint16_t touch_y;
+    touch_gesture_get_key_position(&touch_x, &touch_y);
+
     uint8_t row_index = 0, col_index = 0;
     if (get_touch_coordinates(&row_index, &col_index, touch_x, touch_y)) {
         select_col(col_index);
         matrix_io_delay();
         matrix_row_t last_row_value = current_matrix[row_index];
-        if (touch_signal) {
+        if (touch_gesture_key_is_active()) {
             current_matrix[row_index] |= (MATRIX_ROW_SHIFTER << col_index);
         } else {
             current_matrix[row_index] &= ~(MATRIX_ROW_SHIFTER << col_index);
@@ -184,7 +189,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
     }
 
     static bool touch_signal_latch = false;
-    if (touch_signal) {
+    if (touch_gesture_key_is_active()) {
         touch_signal_latch = true;
     }
     
@@ -192,10 +197,9 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
     switch (display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
             if (!touch_signal_latch) {
-                touch_x = 0xFFFF;
-                touch_y = 0xFFFF;
+                touch_gesture_clear_key_position();
             }
-            if (timer_elapsed(last_touch_time) > touch_repeat_interval) {
+            if (timer_elapsed(last_touch_time) > touch_gesture_repeat_interval()) {
                 if (read_touch(current_matrix)) {
                     changed = true;
                     last_touch_time = timer_read();  
