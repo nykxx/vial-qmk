@@ -1,154 +1,75 @@
-BOOTMAGIC_ENABLE = yes      # Enable Bootmagic Lite
-MOUSEKEY_ENABLE = yes       # Mouse keys
-EXTRAKEY_ENABLE = yes       # Audio control and System control
-CONSOLE_ENABLE = yes         # Console for debug
-COMMAND_ENABLE = no         # Commands for debug and configuration
-NKRO_ENABLE = yes           # Enable N-Key Rollover
+# Core keyboard features
+BOOTMAGIC_ENABLE = yes
+MOUSEKEY_ENABLE = yes
+EXTRAKEY_ENABLE = yes
+CONSOLE_ENABLE = yes
+COMMAND_ENABLE = no
+NKRO_ENABLE = yes
 DYNAMIC_MACRO_ENABLE = yes
 DYNAMIC_KEYMAP_ENABLE = yes
-CUSTOM_MATRIX = lite		# duplex matrix
-OS_DETECTION_ENABLE = yes 
+OS_DETECTION_ENABLE = yes
 
+# Matrix
+CUSTOM_MATRIX = lite
 SRC += matrix.c
 
+# Pointing devices
 POINTING_DEVICE_ENABLE = yes
-
-#add
-# POINTING_DEVICE_HIRES_SCROLL_ENABLE = yes
-# WHEEL_EXTENDED_REPORT            = yes
-
 POINTING_DEVICE_DRIVER = custom
-SRC += ../drivers/pmw3360.c
-SRC += ../drivers/pmw33xx_common.c
-QUANTUM_LIB_SRC += spi_master.c 
 
+OMNI_POINTING_DEVICE_SOURCES := \
+    ../drivers/pmw3360.c \
+    ../drivers/pmw33xx_common.c
+
+SRC += $(OMNI_POINTING_DEVICE_SOURCES)
+QUANTUM_LIB_SRC += spi_master.c
+
+# LCD and generated Quantum Painter resources
 QUANTUM_PAINTER_ENABLE = yes
 QUANTUM_PAINTER_DRIVERS += gc9a01_spi
-SRC += ../common/draw_custom.c
-SRC += ../font/noto9.qff.c
-SRC += ../font/noto11.qff.c
-SRC += ../font/roboto_mono16.qff.c
-SRC += ../font/st2_mono16.qff.c
-SRC += ../icon/omni_image_loader.c
-SRC += ../icon/generated/omni_logo.qgf.c
-SRC += ../icon/generated/save.qgf.c
-SRC += ../icon/generated/layer_00.qgf.c
-SRC += ../icon/generated/layer_01.qgf.c
-SRC += ../icon/generated/layer_02.qgf.c
-SRC += ../icon/generated/layer_03.qgf.c
-SRC += ../icon/generated/layer_04.qgf.c
-SRC += ../icon/generated/layer_05.qgf.c
-SRC += ../icon/generated/layer_06.qgf.c
-SRC += ../icon/generated/layer_07.qgf.c
-SRC += ../icon/generated/layer_08.qgf.c
-SRC += ../icon/generated/layer_09.qgf.c
-SRC += ../icon/generated/layer_10.qgf.c
-SRC += ../icon/generated/layer_11.qgf.c
-SRC += ../icon/generated/000.qgf.c
-SRC += ../icon/generated/001.qgf.c
-SRC += ../icon/generated/002.qgf.c
-SRC += ../icon/generated/003.qgf.c
-SRC += ../icon/generated/004.qgf.c
-SRC += ../icon/generated/005.qgf.c
-SRC += ../icon/generated/006.qgf.c
-SRC += ../icon/generated/007.qgf.c
-SRC += ../icon/generated/008.qgf.c
-SRC += ../icon/generated/009.qgf.c
-SRC += ../icon/generated/010.qgf.c
-SRC += ../icon/generated/011.qgf.c
-SRC += ../icon/generated/012.qgf.c
-SRC += ../icon/generated/013.qgf.c
-SRC += ../icon/generated/014.qgf.c
-SRC += ../icon/generated/015.qgf.c
-SRC += ../icon/generated/016.qgf.c
-SRC += ../icon/generated/017.qgf.c
-SRC += ../icon/generated/018.qgf.c
-SRC += ../icon/generated/019.qgf.c
-SRC += ../icon/generated/020.qgf.c
-SRC += ../icon/generated/021.qgf.c
-SRC += ../icon/generated/022.qgf.c
-SRC += ../icon/generated/023.qgf.c
-SRC += ../icon/generated/024.qgf.c
-SRC += ../icon/generated/025.qgf.c
-SRC += ../icon/generated/026.qgf.c
-SRC += ../icon/generated/027.qgf.c
-SRC += ../icon/generated/028.qgf.c
-SRC += ../icon/generated/029.qgf.c
-SRC += ../icon/generated/030.qgf.c
-SRC += ../icon/generated/031.qgf.c
-SRC += ../icon/generated/032.qgf.c
-SRC += ../icon/generated/033.qgf.c
-SRC += ../icon/generated/034.qgf.c
-SRC += ../icon/generated/035.qgf.c
-SRC += ../icon/generated/036.qgf.c
-SRC += ../icon/generated/037.qgf.c
-SRC += ../icon/generated/038.qgf.c
-SRC += ../icon/generated/039.qgf.c
-SRC += ../icon/generated/040.qgf.c
-SRC += ../icon/generated/041.qgf.c
-SRC += ../icon/generated/042.qgf.c
-SRC += ../icon/generated/043.qgf.c
-SRC += ../icon/generated/044.qgf.c
-SRC += ../icon/generated/045.qgf.c
-SRC += ../icon/generated/046.qgf.c
-SRC += ../icon/generated/047.qgf.c
-SRC += ../icon/generated/048.qgf.c
-SRC += ../icon/generated/049.qgf.c
-SRC += ../icon/generated/050.qgf.c
-SRC += ../icon/generated/051.qgf.c
-SRC += ../icon/generated/052.qgf.c
-SRC += ../icon/generated/053.qgf.c
-SRC += ../icon/generated/054.qgf.c
-SRC += ../icon/generated/055.qgf.c
-SRC += ../icon/generated/056.qgf.c
-SRC += ../icon/generated/057.qgf.c
-SRC += ../icon/generated/058.qgf.c
-SRC += ../icon/generated/059.qgf.c
-SRC += ../icon/generated/060.qgf.c
-SRC += ../icon/generated/061.qgf.c
-SRC += ../icon/generated/062.qgf.c
-SRC += ../icon/generated/063.qgf.c
-SRC += ../icon/generated/064.qgf.c
-SRC += ../icon/generated/065.qgf.c
-SRC += ../icon/generated/066.qgf.c
-SRC += ../icon/generated/067.qgf.c
-SRC += ../icon/generated/068.qgf.c
-SRC += ../icon/generated/069.qgf.c
-SRC += ../icon/generated/070.qgf.c
-SRC += ../icon/generated/071.qgf.c
-SRC += ../icon/generated/072.qgf.c
-SRC += ../icon/generated/073.qgf.c
-SRC += ../icon/generated/074.qgf.c
-SRC += ../icon/generated/075.qgf.c
-SRC += ../icon/generated/076.qgf.c
-SRC += ../icon/generated/077.qgf.c
-SRC += ../icon/generated/078.qgf.c
-SRC += ../icon/generated/079.qgf.c
-SRC += ../icon/generated/080.qgf.c
-SRC += ../icon/generated/081.qgf.c
-SRC += ../icon/generated/082.qgf.c
-SRC += ../icon/generated/083.qgf.c
-SRC += ../icon/generated/084.qgf.c
-SRC += ../icon/generated/085.qgf.c
-SRC += ../icon/generated/086.qgf.c
 
+OMNI_FONT_SOURCES := \
+    ../font/noto9.qff.c \
+    ../font/noto11.qff.c \
+    ../font/roboto_mono16.qff.c \
+    ../font/st2_mono16.qff.c
+
+OMNI_GENERATED_IMAGE_DIR := ../icon/generated
+OMNI_GENERATED_IMAGE_SEARCH_DIR := $(KEYBOARD_PATH_1)/$(OMNI_GENERATED_IMAGE_DIR)
+# Keep arbitrary .c files out of the build; only supported generated-image names are discovered.
+OMNI_GENERATED_IMAGE_FILES := \
+    omni_logo.qgf.c \
+    save.qgf.c \
+    $(notdir $(wildcard $(OMNI_GENERATED_IMAGE_SEARCH_DIR)/layer_*.qgf.c)) \
+    $(notdir $(wildcard $(OMNI_GENERATED_IMAGE_SEARCH_DIR)/[0-9][0-9][0-9].qgf.c))
+OMNI_GENERATED_IMAGE_SOURCES := $(addprefix $(OMNI_GENERATED_IMAGE_DIR)/,$(OMNI_GENERATED_IMAGE_FILES))
+
+SRC += ../common/draw_custom.c
+SRC += $(OMNI_FONT_SOURCES)
+SRC += ../icon/omni_image_loader.c
+SRC += $(OMNI_GENERATED_IMAGE_SOURCES)
+
+# Touch controller
 I2C_ENABLE = yes
 QUANTUM_LIB_SRC += i2c_master.c
 SRC += drivers/cst816t.c
-# SRC += ../common/get_custom_gesture.c
 
-SRC += ../common/sleeping_view.c
-SRC += ../common/swipe_gesture.c
-SRC += ../common/view_keymap.c
-SRC += ../common/trackball_omni.c
-SRC += ../common/trackball_tuning.c
-SRC += ../common/config_omni.c
-SRC += ../common/touch_gesture.c
-SRC += ../common/touch_input.c
-SRC += ../common/touch_key_view.c
-SRC += ../common/touch_lcd_omni.c
-SRC += ../common/power_lcd.c
-SRC += ../common/status_view.c
+# Shared omni modules
+OMNI_COMMON_SOURCES := \
+    ../common/sleeping_view.c \
+    ../common/swipe_gesture.c \
+    ../common/view_keymap.c \
+    ../common/trackball_omni.c \
+    ../common/trackball_tuning.c \
+    ../common/config_omni.c \
+    ../common/touch_gesture.c \
+    ../common/touch_input.c \
+    ../common/touch_key_view.c \
+    ../common/touch_lcd_omni.c \
+    ../common/power_lcd.c \
+    ../common/status_view.c
 
-# SRC += ../common/keymap_changed_hook.c
+SRC += $(OMNI_COMMON_SOURCES)
+
+# Reload display and device settings after Vial changes the dynamic keymap.
 LDFLAGS += -Wl,--wrap=dynamic_keymap_set_keycode
