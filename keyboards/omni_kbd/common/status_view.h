@@ -38,11 +38,5 @@ void ui_handle_touch(painter_device_t dev, painter_font_handle_t font, int16_t t
 void persist_load_all(void);
 void sync_default_layer_to_os(void);
 
-extern uint8_t hi_res_interval_v;
-extern uint8_t hi_res_value_v;
-extern uint8_t hi_res_interval_h;
-extern uint8_t hi_res_value_h;
-extern int8_t ud_sc_mode_flag;
-extern int8_t lr_sc_mode_flag;
 bool sv_hrv_enabled_current(void);
 bool sv_hrh_enabled_current(void);

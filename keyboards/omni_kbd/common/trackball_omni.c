@@ -7,7 +7,6 @@
 #include "trackball_omni.h"
 #include "timer.h"
 #include "config_omni.h"
-#include "status_view.h"
 
 #define constrain_hid(amt) ((amt) < -127 ? -127 : ((amt) > 127 ? 127 : (amt)))
 #define constrain_hid16(amt) ((amt) < -32767 ? -32767 : ((amt) > 32767 ? 32767 : (amt)))
@@ -16,6 +15,46 @@ static float accumulated_x = 0.0f;
 static float accumulated_y = 0.0f;
 static float accumulated_h = 0.0f;
 static float accumulated_v = 0.0f;
+
+typedef struct {
+    uint8_t vertical_interval;
+    uint8_t vertical_value;
+    uint8_t horizontal_interval;
+    uint8_t horizontal_value;
+    int8_t vertical_direction;
+    int8_t horizontal_direction;
+} trackball_scroll_config_t;
+
+static trackball_scroll_config_t scroll_config = {
+    .vertical_interval = 100,
+    .vertical_value = 100,
+    .horizontal_interval = 100,
+    .horizontal_value = 100,
+    .vertical_direction = 1,
+    .horizontal_direction = 1,
+};
+
+void trackball_set_vertical_scroll_interval(uint8_t interval) {
+    scroll_config.vertical_interval = interval;
+}
+
+void trackball_set_vertical_scroll_value(uint8_t value) {
+    scroll_config.vertical_value = value;
+}
+
+void trackball_set_horizontal_scroll_interval(uint8_t interval) {
+    scroll_config.horizontal_interval = interval;
+}
+
+void trackball_set_horizontal_scroll_value(uint8_t value) {
+    scroll_config.horizontal_value = value;
+}
+
+void trackball_set_scroll_inverted(bool inverted) {
+    int8_t direction = inverted ? -1 : 1;
+    scroll_config.vertical_direction = direction;
+    scroll_config.horizontal_direction = direction;
+}
 
 static inline float clamp_abs_float(float value, float limit) {
     if (value > limit) return limit;
@@ -51,13 +90,13 @@ void process_cursor_report(report_mouse_t *mouse_report, pmw33xx_report_t report
 }
 
 static void send_high_res_scroll_report(report_mouse_t *mouse_report, trackball_scroll_state_t *scroll_state) {
-    if (fabs(scroll_state->accumulated_v) >= 1.0f * (clamp_1_100_x(hi_res_interval_v) * 12 / 10)) {
-        mouse_report->v = constrain_hid16(mouse_report->v + scroll_state->accumulated_v) / (clamp_1_100_x(hi_res_value_v) * 12 / 10);
+    if (fabs(scroll_state->accumulated_v) >= 1.0f * (clamp_1_100_x(scroll_config.vertical_interval) * 12 / 10)) {
+        mouse_report->v = constrain_hid16(mouse_report->v + scroll_state->accumulated_v) / (clamp_1_100_x(scroll_config.vertical_value) * 12 / 10);
         scroll_state->accumulated_v = 0;
     }
 
-    if (fabs(scroll_state->accumulated_h) >= 1.0f * (clamp_1_100_x(hi_res_interval_h) * 12 / 10)) {
-        mouse_report->h = -constrain_hid16(mouse_report->h + scroll_state->accumulated_h) / (clamp_1_100_x(hi_res_value_h) * 12 / 10);
+    if (fabs(scroll_state->accumulated_h) >= 1.0f * (clamp_1_100_x(scroll_config.horizontal_interval) * 12 / 10)) {
+        mouse_report->h = -constrain_hid16(mouse_report->h + scroll_state->accumulated_h) / (clamp_1_100_x(scroll_config.horizontal_value) * 12 / 10);
         scroll_state->accumulated_h = 0;
     }
 }
@@ -130,8 +169,8 @@ void process_high_res_scroll_report(report_mouse_t *mouse_report, pmw33xx_report
     uint16_t corr_calc_rapport_max = 600;
     float x = (report.delta_x * cpi_scale);
     float y = (report.delta_y * cpi_scale);
-    int sign_x = ((x > 0) - (x < 0)) * rx * lr_sc_mode_flag;
-    int sign_y = ((y > 0) - (y < 0)) * ry * ud_sc_mode_flag;
+    int sign_x = ((x > 0) - (x < 0)) * rx * scroll_config.horizontal_direction;
+    int sign_y = ((y > 0) - (y < 0)) * ry * scroll_config.vertical_direction;
     float x_corr = pow(fabs(x), speed_adjust) / pow(corr_calc_rapport_max, speed_adjust) * corr_calc_rapport_max / 100 * slope_factor * sign_x;
     float y_corr = pow(fabs(y), speed_adjust) / pow(corr_calc_rapport_max, speed_adjust) * corr_calc_rapport_max / 100 * slope_factor * sign_y;
 
@@ -160,8 +199,8 @@ void process_tap_report(report_mouse_t *mouse_report, pmw33xx_report_t report, f
     if (!report.motion.b.is_lifted) {
         int x = (report.delta_x / cpi_scale);
         int y = (report.delta_y / cpi_scale);
-        int sign_x = ((x > 0) - (x < 0)) * rx * lr_sc_mode_flag;
-        int sign_y = ((y > 0) - (y < 0)) * ry * ud_sc_mode_flag;
+        int sign_x = ((x > 0) - (x < 0)) * rx * scroll_config.horizontal_direction;
+        int sign_y = ((y > 0) - (y < 0)) * ry * scroll_config.vertical_direction;
         float x_corr = pow(fabs(x), speed_adjust) / pow(127, speed_adjust) * 127 / 100 * slope_factor * sign_x;
         float y_corr = pow(fabs(y), speed_adjust) / pow(127, speed_adjust) * 127 / 100 * slope_factor * sign_y;
         const float diagonal_limit = 0.6f;

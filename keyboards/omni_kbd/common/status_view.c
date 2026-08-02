@@ -8,13 +8,7 @@
 #include "config_omni.h"
 #include "touch_gesture.h"
 #include "touch_lcd_omni.h"
-
-uint8_t hi_res_interval_v = 100;
-uint8_t hi_res_value_v    = 100;
-uint8_t hi_res_interval_h = 100;
-uint8_t hi_res_value_h    = 100;
-int8_t ud_sc_mode_flag = 1;
-int8_t lr_sc_mode_flag = 1;
+#include "trackball_omni.h"
 
 static inline uint8_t clamp_u8(int16_t v, uint8_t lo, uint8_t hi) {
     if (v < lo) v = lo;
@@ -119,18 +113,18 @@ static inline void apply_to_param(uint8_t toggle_idx, bool is_upper_bar, uint8_t
         case IDX_HRV:
             if (is_upper_bar) {
                 if (sv_hrv_enabled_current()) {
-                    hi_res_interval_v = clamp_0_100_x(bar_x);
+                    trackball_set_vertical_scroll_interval(clamp_0_100_x(bar_x));
                 } else {
-                    hi_res_interval_v = 100;
+                    trackball_set_vertical_scroll_interval(100);
                 }
             } else {
                 if (sv_hrv_enabled_current()) {
-                    hi_res_value_v = clamp_0_100_x(bar_x); //hi-res off
+                    trackball_set_vertical_scroll_value(clamp_0_100_x(bar_x));
                 } else {
                     if (g_default_layer == 0) {
-                        hi_res_value_v = 1; // win
+                        trackball_set_vertical_scroll_value(1);
                     } else if (g_default_layer == 1) {
-                        hi_res_value_v = 100; // mac
+                        trackball_set_vertical_scroll_value(100);
                     }
                 }
             }
@@ -139,31 +133,25 @@ static inline void apply_to_param(uint8_t toggle_idx, bool is_upper_bar, uint8_t
         case IDX_HRH:
             if (is_upper_bar) {
                 if (sv_hrh_enabled_current()) {
-                    hi_res_interval_h = clamp_0_100_x(bar_x);
+                    trackball_set_horizontal_scroll_interval(clamp_0_100_x(bar_x));
                 } else {
-                    hi_res_interval_h = 100;
+                    trackball_set_horizontal_scroll_interval(100);
                 }
             } else {
                 if (sv_hrh_enabled_current()) {
-                    hi_res_value_h    = clamp_0_100_x(bar_x);
+                    trackball_set_horizontal_scroll_value(clamp_0_100_x(bar_x));
                 } else {
                     if (g_default_layer == 0) {
-                        hi_res_value_h = 1; // win
+                        trackball_set_horizontal_scroll_value(1);
                     } else if (g_default_layer == 1) {
-                        hi_res_value_h = 100; // mac
+                        trackball_set_horizontal_scroll_value(100);
                     }
                 }
             }
             break;
 
         case IDX_SCD:
-            if (os_tog_state[current_profile_index()][IDX_SCD]) {
-                ud_sc_mode_flag = -1;
-                lr_sc_mode_flag = -1;
-            } else {
-                ud_sc_mode_flag = 1;
-                lr_sc_mode_flag = 1;
-            }
+            trackball_set_scroll_inverted(os_tog_state[current_profile_index()][IDX_SCD] != 0);
             break;
 
         case IDX_AML:
@@ -470,4 +458,3 @@ void sync_default_layer_to_os(void) {
     load_params_from_prms();
     
 }
-

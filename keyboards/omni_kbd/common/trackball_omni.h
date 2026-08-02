@@ -44,6 +44,12 @@ typedef struct {
     trackball_scroll_axis_t active_axis;
 } trackball_scroll_state_t;
 
+void trackball_set_vertical_scroll_interval(uint8_t interval);
+void trackball_set_vertical_scroll_value(uint8_t value);
+void trackball_set_horizontal_scroll_interval(uint8_t interval);
+void trackball_set_horizontal_scroll_value(uint8_t value);
+void trackball_set_scroll_inverted(bool inverted);
+
 void process_cursor_report(report_mouse_t *mouse_report, pmw33xx_report_t report, float speed_adjust, uint8_t slope_factor, int rx, int ry, uint8_t cpi_scale);
 void process_high_res_scroll_report(report_mouse_t *mouse_report, pmw33xx_report_t report, trackball_scroll_state_t *scroll_state, float speed_adjust, uint8_t slope_factor, int rx, int ry, uint8_t cpi_scale);
 void process_tap_report(report_mouse_t *mouse_report, pmw33xx_report_t report, float speed_adjust, uint8_t slope_factor, int rx, int ry, uint8_t cpi_scale);
