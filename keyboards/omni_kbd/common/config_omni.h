@@ -1,15 +1,12 @@
 #pragma once
-#include "quantum.h"
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "os_detection.h"
 
-#define DEFAULT_SPEED_ADJUST1 1.6f
-#define DEFAULT_SLOPE_FACTOR1 50
-#define DEFAULT_SPEED_ADJUST2 1.4f
-#define DEFAULT_SLOPE_FACTOR2 70
-
-extern bool keymap_change_update_flag;
+#define DEFAULT_CURSOR_SPEED_FACTOR 1.6f
+#define DEFAULT_CURSOR_SLOPE_FACTOR 50
+#define DEFAULT_SCROLL_SPEED_FACTOR 1.4f
+#define DEFAULT_SCROLL_SLOPE_FACTOR 70
 
 extern uint8_t hue_bg;
 extern uint8_t sat_bg;
@@ -26,39 +23,23 @@ extern int slope_factor1;
 extern float speed_adjust2;
 extern int slope_factor2; 
 
-void save_omni_color_config(void);
-void load_omni_color_config(void);
-void save_omni_tb_config(void);
-void load_omni_tb_config(void);
+void omni_config_save_colors(void);
+void omni_config_load_colors(void);
+void omni_config_save_trackball(void);
+void omni_config_load_trackball(void);
 
 extern bool         is_on_aos;
 extern os_variant_t manual_os;
 
-void omni_status_save_global(void);
-void omni_status_load_global(void);
+bool omni_config_should_reload_after_keymap_update(void);
 
-#define STATUS_TOG_COUNT 6
+void    omni_status_save_auto_os_enabled(bool enabled);
+bool    omni_status_load_auto_os_enabled(void);
+void    omni_status_save_manual_layer(uint8_t layer);
+uint8_t omni_status_load_manual_layer(void);
+void    omni_status_save_toggle_enabled(uint8_t profile, uint8_t toggle_index, bool enabled);
+bool    omni_status_load_toggle_enabled(uint8_t profile, uint8_t toggle_index);
 
-extern uint8_t osbuf_tog_win[STATUS_TOG_COUNT];
-extern uint8_t osbuf_up_win [STATUS_TOG_COUNT];
-extern uint8_t osbuf_lo_win [STATUS_TOG_COUNT];
-
-extern uint8_t osbuf_tog_mac[STATUS_TOG_COUNT];
-extern uint8_t osbuf_up_mac [STATUS_TOG_COUNT];
-extern uint8_t osbuf_lo_mac [STATUS_TOG_COUNT];
-
-void omni_status_save_os_win(void);
-void omni_status_save_os_mac(void);
-void omni_status_load_os_win(void);
-void omni_status_load_os_mac(void);
-
-void omni_status_save_toggle_aos(bool state);
-void omni_status_save_toggle_osc(uint8_t state);
-void omni_status_save_toggle_normal(uint8_t profile, uint8_t index, bool state);
-bool omni_status_load_toggle_aos(void);
-bool omni_status_load_toggle_osc(void);
-bool omni_status_load_toggle_normal(uint8_t profile, uint8_t index);
-
-void omni_status_save_bar(uint8_t profile, bool upper, uint8_t index, uint8_t value);
-uint8_t omni_status_load_bar(uint8_t profile, bool upper, uint8_t index);
-int omni_status_load_parameter_value(uint8_t profile, bool upper, uint8_t index);
+void    omni_status_save_bar_value(uint8_t profile, bool upper, uint8_t toggle_index, uint8_t value);
+uint8_t omni_status_load_bar_value(uint8_t profile, bool upper, uint8_t toggle_index);
+int     omni_status_load_parameter_value(uint8_t profile, bool upper, uint8_t toggle_index);

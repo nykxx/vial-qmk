@@ -21,9 +21,15 @@ enum {
     STATUS_MACOS_LOWER_VALUE_ROW    = 15,
     STATUS_AUTO_OS_CONFIG_COLUMN    = 0,
     STATUS_MANUAL_OS_CONFIG_COLUMN  = 1,
-    STATUS_BASE_PROFILE             = 0,
-    STATUS_SUB_PROFILE              = 1,
+    CONFIG_LAST_USED_COLUMN         = 5,
+    STATUS_WINDOWS_PROFILE          = 0,
+    STATUS_MACOS_PROFILE            = 1,
 };
+
+_Static_assert(OMNI_GENERAL_CONFIG_LAYER < DYNAMIC_KEYMAP_LAYER_COUNT, "General config layer must be stored in the dynamic keymap");
+_Static_assert(OMNI_STATUS_CONFIG_LAYER < DYNAMIC_KEYMAP_LAYER_COUNT, "Status config layer must be stored in the dynamic keymap");
+_Static_assert(STATUS_MACOS_LOWER_VALUE_ROW < MATRIX_ROWS, "Status config rows must fit in the matrix");
+_Static_assert(CONFIG_LAST_USED_COLUMN < MATRIX_COLS, "Config columns must fit in the matrix");
 
 typedef struct {
     uint8_t layer;
@@ -94,10 +100,22 @@ int slope_factor1;
 float speed_adjust2;
 int slope_factor2; 
 
-bool keymap_change_update_flag = true;
+static bool config_write_in_progress;
 
-void save_omni_color_config(void) {
-    keymap_change_update_flag = false;
+static void begin_config_write(void) {
+    config_write_in_progress = true;
+}
+
+static void end_config_write(void) {
+    config_write_in_progress = false;
+}
+
+bool omni_config_should_reload_after_keymap_update(void) {
+    return !config_write_in_progress;
+}
+
+void omni_config_save_colors(void) {
+    begin_config_write();
     write_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_HUE], hue_bg);
     write_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_SATURATION], sat_bg);
     write_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_VALUE], val_bg);
@@ -107,10 +125,10 @@ void save_omni_color_config(void) {
     write_config_value(&color_config_cells[COLOR_CONFIG_SUB_HUE], hue_sub_color);
     write_config_value(&color_config_cells[COLOR_CONFIG_SUB_SATURATION], sat_sub_color);
     write_config_value(&color_config_cells[COLOR_CONFIG_SUB_VALUE], val_sub_color);
-    keymap_change_update_flag = true;
+    end_config_write();
 }
 
-void load_omni_color_config(void) {
+void omni_config_load_colors(void) {
     hue_bg = read_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_HUE]);
     sat_bg = read_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_SATURATION]);
     val_bg = read_config_value(&color_config_cells[COLOR_CONFIG_BACKGROUND_VALUE]);
@@ -122,31 +140,31 @@ void load_omni_color_config(void) {
     val_sub_color = read_config_value(&color_config_cells[COLOR_CONFIG_SUB_VALUE]);
 }
 
-void save_omni_tb_config(void) {
-    keymap_change_update_flag = false;
+void omni_config_save_trackball(void) {
+    begin_config_write();
     write_config_value(&trackball_config_cells[TRACKBALL_CONFIG_CURSOR_SPEED], (int)round(speed_adjust1 * 10));
     write_config_value(&trackball_config_cells[TRACKBALL_CONFIG_CURSOR_SLOPE], slope_factor1);
     write_config_value(&trackball_config_cells[TRACKBALL_CONFIG_SCROLL_SPEED], (int)round(speed_adjust2 * 10));
     write_config_value(&trackball_config_cells[TRACKBALL_CONFIG_SCROLL_SLOPE], slope_factor2);
-    keymap_change_update_flag = true;
+    end_config_write();
 }
 
-void load_omni_tb_config(void) {
+void omni_config_load_trackball(void) {
     speed_adjust1 = read_config_value(&trackball_config_cells[TRACKBALL_CONFIG_CURSOR_SPEED]) / 10.0f;
     slope_factor1 = read_config_value(&trackball_config_cells[TRACKBALL_CONFIG_CURSOR_SLOPE]);
     speed_adjust2 = read_config_value(&trackball_config_cells[TRACKBALL_CONFIG_SCROLL_SPEED]) / 10.0f;
     slope_factor2 = read_config_value(&trackball_config_cells[TRACKBALL_CONFIG_SCROLL_SLOPE]);
     if (speed_adjust1 > 3.0f || speed_adjust1 < 0.1f) {
-        speed_adjust1 = DEFAULT_SPEED_ADJUST1;
+        speed_adjust1 = DEFAULT_CURSOR_SPEED_FACTOR;
     }
     if (slope_factor1 > 100 || slope_factor1 < 10) {
-        slope_factor1 = DEFAULT_SLOPE_FACTOR1;
+        slope_factor1 = DEFAULT_CURSOR_SLOPE_FACTOR;
     }
     if (speed_adjust2 > 3.0f || speed_adjust2 < 0.1f) {
-        speed_adjust2 = DEFAULT_SPEED_ADJUST2;
+        speed_adjust2 = DEFAULT_SCROLL_SPEED_FACTOR;
     }
     if (slope_factor2 > 100 || slope_factor2 < 10) {
-        slope_factor2= DEFAULT_SLOPE_FACTOR2;
+        slope_factor2 = DEFAULT_SCROLL_SLOPE_FACTOR;
     }
 }
 
@@ -156,142 +174,91 @@ static inline uint16_t encode_stored_bool(bool value) {
     return omni_stored_value_encode(value ? 1u : 0u);
 }
 
-static inline uint8_t status_toggle_row(os_variant_t os) {
-    return os == OS_MACOS ? STATUS_MACOS_TOGGLE_ROW : STATUS_WINDOWS_TOGGLE_ROW;
-}
-
-static inline uint8_t status_upper_value_row(os_variant_t os) {
-    return os == OS_MACOS ? STATUS_MACOS_UPPER_VALUE_ROW : STATUS_WINDOWS_UPPER_VALUE_ROW;
-}
-
-static inline uint8_t status_lower_value_row(os_variant_t os) {
-    return os == OS_MACOS ? STATUS_MACOS_LOWER_VALUE_ROW : STATUS_WINDOWS_LOWER_VALUE_ROW;
-}
-
 bool         is_on_aos  = false;
 os_variant_t manual_os  = OS_WINDOWS;
 
-void omni_status_save_global(void) {
-    keymap_change_update_flag = false;
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN, encode_stored_bool(is_on_aos));
-    uint8_t mos = (manual_os == OS_MACOS) ? 1 : 0;
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN, omni_stored_value_encode(mos));
-    keymap_change_update_flag = true;
-}
-
-void omni_status_load_global(void) {
-    uint16_t kc_aos = dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN);
-    uint16_t kc_mos = dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN);
-    is_on_aos = omni_stored_u8_decode_or_zero(kc_aos) != 0;
-    manual_os = omni_stored_u8_decode_or_zero(kc_mos) == 1 ? OS_MACOS : OS_WINDOWS;
-}
-
-uint8_t osbuf_tog_win[STATUS_TOG_COUNT] = {0};
-uint8_t osbuf_up_win [STATUS_TOG_COUNT] = {0};
-uint8_t osbuf_lo_win [STATUS_TOG_COUNT] = {0};
-uint8_t osbuf_tog_mac[STATUS_TOG_COUNT] = {0};
-uint8_t osbuf_up_mac [STATUS_TOG_COUNT] = {0};
-uint8_t osbuf_lo_mac [STATUS_TOG_COUNT] = {0};
-
-static inline uint8_t  clamp100(uint8_t v) { return (v > 100) ? 100 : v; }
-
-static void save_rows(os_variant_t os, const uint8_t *tog, const uint8_t *up, const uint8_t *lo){
-    const uint8_t toggle_row = status_toggle_row(os);
-    const uint8_t upper_value_row = status_upper_value_row(os);
-    const uint8_t lower_value_row = status_lower_value_row(os);
-    keymap_change_update_flag = false;
-    for (uint8_t i=0; i<STATUS_TOG_COUNT; i++){
-        dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, i, omni_stored_value_encode(tog ? (tog[i] ? 1 : 0) : 0));
-        dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, upper_value_row, i, omni_stored_value_encode(up ? clamp100(up[i]) : 0));
-        dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, lower_value_row, i, omni_stored_value_encode(lo ? clamp100(lo[i]) : 0));
+static uint8_t clamp_status_parameter(int value) {
+    if (value < 0) {
+        return 0;
     }
-    keymap_change_update_flag = true;
-}
-static void load_rows(os_variant_t os, uint8_t *tog, uint8_t *up, uint8_t *lo){
-    const uint8_t toggle_row = status_toggle_row(os);
-    const uint8_t upper_value_row = status_upper_value_row(os);
-    const uint8_t lower_value_row = status_lower_value_row(os);
-    for (uint8_t i=0; i<STATUS_TOG_COUNT; i++){
-        if (tog) tog[i] = omni_stored_u8_decode_or_zero(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, i)) ? 1 : 0;
-        if (up)  up[i]  = clamp100(omni_stored_u8_decode_or_zero(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, upper_value_row, i)));
-        if (lo)  lo[i]  = clamp100(omni_stored_u8_decode_or_zero(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, lower_value_row, i)));
+    if (value > 100) {
+        return 100;
     }
+    return (uint8_t)value;
 }
 
-void omni_status_save_os_win(void){ save_rows(OS_WINDOWS, osbuf_tog_win, osbuf_up_win, osbuf_lo_win); }
-void omni_status_save_os_mac(void){ save_rows(OS_MACOS,  osbuf_tog_mac, osbuf_up_mac, osbuf_lo_mac); }
-void omni_status_load_os_win(void){ load_rows(OS_WINDOWS, osbuf_tog_win, osbuf_up_win, osbuf_lo_win); }
-void omni_status_load_os_mac(void){ load_rows(OS_MACOS,  osbuf_tog_mac, osbuf_up_mac, osbuf_lo_mac); }
-
-
-static inline uint8_t clamp_1_100_int(int v) {
-    if (v < 1)   return 1;
-    if (v > 100) return 100;
-    return (uint8_t)v;
-}
-static inline uint8_t clamp_0_100_int(int v) {
-    if (v < 0)   return 0;
-    if (v > 100) return 100;
-    return (uint8_t)v;
+static uint8_t status_toggle_row_for_profile(uint8_t profile) {
+    if (profile == STATUS_WINDOWS_PROFILE) {
+        return STATUS_WINDOWS_TOGGLE_ROW;
+    }
+    if (profile == STATUS_MACOS_PROFILE) {
+        return STATUS_MACOS_TOGGLE_ROW;
+    }
+    /* Preserve the legacy fallback for an invalid profile. */
+    return 0;
 }
 
-
-void omni_status_save_toggle_aos(bool state) {
-    keymap_change_update_flag = false;
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN, encode_stored_bool(state));
-    keymap_change_update_flag = true;
+static uint8_t status_parameter_row_for_profile(uint8_t profile, bool upper) {
+    /* Preserve the legacy mapping: profile zero is Windows; any other value is macOS. */
+    if (profile == STATUS_WINDOWS_PROFILE) {
+        return upper ? STATUS_WINDOWS_UPPER_VALUE_ROW : STATUS_WINDOWS_LOWER_VALUE_ROW;
+    }
+    return upper ? STATUS_MACOS_UPPER_VALUE_ROW : STATUS_MACOS_LOWER_VALUE_ROW;
 }
 
-void omni_status_save_toggle_osc(uint8_t state) {
-    keymap_change_update_flag = false;
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN, omni_stored_value_encode(state));
-    keymap_change_update_flag = true;
+
+void omni_status_save_auto_os_enabled(bool enabled) {
+    begin_config_write();
+    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN, encode_stored_bool(enabled));
+    end_config_write();
 }
 
-void omni_status_save_toggle_normal(uint8_t profile, uint8_t index, bool state) {
-    keymap_change_update_flag = false;
-    uint8_t toggle_row = profile == STATUS_BASE_PROFILE ? STATUS_WINDOWS_TOGGLE_ROW : (profile == STATUS_SUB_PROFILE ? STATUS_MACOS_TOGGLE_ROW : 0);
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, index, encode_stored_bool(state));
-    keymap_change_update_flag = true;
+void omni_status_save_manual_layer(uint8_t layer) {
+    begin_config_write();
+    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN, omni_stored_value_encode(layer));
+    end_config_write();
 }
 
-bool omni_status_load_toggle_aos(void) {
-    bool state = omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN));
-    return state;
+void omni_status_save_toggle_enabled(uint8_t profile, uint8_t toggle_index, bool enabled) {
+    const uint8_t toggle_row = status_toggle_row_for_profile(profile);
+    begin_config_write();
+    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, toggle_index, encode_stored_bool(enabled));
+    end_config_write();
 }
 
-bool omni_status_load_toggle_osc(void) {
-    bool state = omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN));
-    return state;
+bool omni_status_load_auto_os_enabled(void) {
+    return omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_AUTO_OS_CONFIG_COLUMN));
 }
 
-bool omni_status_load_toggle_normal(uint8_t profile, uint8_t index) {
-    uint8_t toggle_row = profile == STATUS_BASE_PROFILE ? STATUS_WINDOWS_TOGGLE_ROW : (profile == STATUS_SUB_PROFILE ? STATUS_MACOS_TOGGLE_ROW : 0);
-    bool state = omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, index));
-    return state;
+uint8_t omni_status_load_manual_layer(void) {
+    const uint16_t keycode = dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, STATUS_GLOBAL_CONFIG_ROW, STATUS_MANUAL_OS_CONFIG_COLUMN);
+    return omni_stored_value_decode(keycode) != 0;
 }
 
-static inline uint8_t row_bar(uint8_t profile, bool upper) {
-    if (upper) return profile ? STATUS_MACOS_UPPER_VALUE_ROW : STATUS_WINDOWS_UPPER_VALUE_ROW;
-    else       return profile ? STATUS_MACOS_LOWER_VALUE_ROW : STATUS_WINDOWS_LOWER_VALUE_ROW;
+bool omni_status_load_toggle_enabled(uint8_t profile, uint8_t toggle_index) {
+    const uint8_t toggle_row = status_toggle_row_for_profile(profile);
+    return omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, toggle_row, toggle_index));
 }
 
-uint8_t omni_status_load_bar(uint8_t profile, bool upper, uint8_t index) {
-    return clamp_0_100_int(omni_status_load_parameter_value(profile, upper, index));
+uint8_t omni_status_load_bar_value(uint8_t profile, bool upper, uint8_t toggle_index) {
+    return clamp_status_parameter(omni_status_load_parameter_value(profile, upper, toggle_index));
 }
 
-int omni_status_load_parameter_value(uint8_t profile, bool upper, uint8_t index) {
-    return omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, row_bar(profile, upper), index));
+int omni_status_load_parameter_value(uint8_t profile, bool upper, uint8_t toggle_index) {
+    const uint8_t value_row = status_parameter_row_for_profile(profile, upper);
+    return omni_stored_value_decode(dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, value_row, toggle_index));
 }
 
-void omni_status_save_bar(uint8_t profile, bool upper, uint8_t index, uint8_t value) {
-    uint8_t  v   = clamp_0_100_int(value);
-    uint8_t  row = row_bar(profile, upper);
-    uint16_t kc  = omni_stored_value_encode(v);
+void omni_status_save_bar_value(uint8_t profile, bool upper, uint8_t toggle_index, uint8_t value) {
+    const uint8_t clamped_value = clamp_status_parameter(value);
+    const uint8_t value_row = status_parameter_row_for_profile(profile, upper);
+    const uint16_t encoded_value = omni_stored_value_encode(clamped_value);
 
-    if (dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, row, index) == kc) return;
+    if (dynamic_keymap_get_keycode(OMNI_STATUS_CONFIG_LAYER, value_row, toggle_index) == encoded_value) {
+        return;
+    }
 
-    keymap_change_update_flag = false;
-    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, row, index, kc);
-    keymap_change_update_flag = true;
+    begin_config_write();
+    dynamic_keymap_set_keycode(OMNI_STATUS_CONFIG_LAYER, value_row, toggle_index, encoded_value);
+    end_config_write();
 }

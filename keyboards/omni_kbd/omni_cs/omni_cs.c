@@ -193,7 +193,7 @@ static bool process_display_keycode(uint16_t keycode) {
 }
 
 static void refresh_swipe_gesture_view(void) {
-    save_omni_color_config();
+    omni_config_save_colors();
     draw_background_all(display_context.device);
     swipe_gesture_draw_base(display_context.device);
     swipe_gesture_draw_main(display_context.device, display_context.interface_font, touch_key_view_current_page());
@@ -204,8 +204,8 @@ static void load_persistent_config(void) {
     if (!eeconfig_is_enabled()) {
         eeconfig_init();
     }
-    load_omni_tb_config();
-    load_omni_color_config();
+    omni_config_load_trackball();
+    omni_config_load_colors();
     status_view_load_persistent_state();
 }
 
@@ -419,11 +419,11 @@ void __real_dynamic_keymap_set_keycode(uint8_t layer, uint8_t row, uint8_t col, 
 
 void __wrap_dynamic_keymap_set_keycode(uint8_t layer, uint8_t row, uint8_t col, uint16_t keycode) {
     __real_dynamic_keymap_set_keycode(layer, row, col, keycode);
-    if (keymap_change_update_flag){
+    if (omni_config_should_reload_after_keymap_update()) {
         load_virtual_keys();
         update_lcd_view_data();
-        load_omni_tb_config();
-        load_omni_color_config();
+        omni_config_load_trackball();
+        omni_config_load_colors();
         status_view_load_persistent_state();
         display_set_mode(DISPLAY_MODE_TOUCH_KEY);
     }

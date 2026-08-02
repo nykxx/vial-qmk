@@ -289,7 +289,7 @@ static void draw_auto_os_button(painter_device_t display, painter_font_handle_t 
     const char *label = "OS";
     const bool  state = is_on_aos;
     /* Existing behavior: every redraw synchronizes this value to storage. */
-    omni_status_save_toggle_aos(state);
+    omni_status_save_auto_os_enabled(state);
 
     const uint16_t center_x = STATUS_AUTO_OS_BUTTON_X;
     const uint16_t center_y = STATUS_TOP_ROW_Y;
@@ -319,7 +319,7 @@ static void draw_manual_os_button(painter_device_t display, painter_font_handle_
     const char *label = os_name_short(current_os);
 
     /* Existing behavior: every redraw synchronizes this value to storage. */
-    omni_status_save_toggle_osc(active_default_layer);
+    omni_status_save_manual_layer(active_default_layer);
 
     const uint16_t center_x = STATUS_MANUAL_OS_BUTTON_X;
     const uint16_t center_y = STATUS_TOP_ROW_Y;
@@ -342,7 +342,7 @@ static void draw_toggle_button(status_toggle_id_t toggle_id, painter_device_t di
     const bool state = profile_toggle_states[profile][toggle_id] != 0;
 
     /* Existing behavior: every redraw synchronizes this value to storage. */
-    omni_status_save_toggle_normal(profile, toggle_id, state);
+    omni_status_save_toggle_enabled(profile, toggle_id, state);
 
     const status_rect_t button_rect = status_button_rect(toggle_config->center_x, toggle_config->center_y);
     const uint8_t main_value_on  = clamp_u8(value, 160, 255);
@@ -387,8 +387,8 @@ static void apply_current_profile_parameters(void) {
 }
 
 void status_view_load_persistent_state(void) {
-    is_on_aos = omni_status_load_toggle_aos();
-    manual_os = omni_status_load_toggle_osc();
+    is_on_aos = omni_status_load_auto_os_enabled();
+    manual_os = omni_status_load_manual_layer();
 
     if (!is_on_aos) {
         active_default_layer = manual_os;
@@ -399,9 +399,9 @@ void status_view_load_persistent_state(void) {
         default_layer_set(1UL << active_default_layer);
     }
     for (status_toggle_id_t toggle_id = 0; toggle_id < STATUS_TOGGLE_COUNT; toggle_id++) {
-        profile_toggle_states[active_default_layer][toggle_id] = omni_status_load_toggle_normal(active_default_layer, toggle_id);
-        profile_upper_bar_positions[active_default_layer][toggle_id] = omni_status_load_bar(active_default_layer, true, toggle_id);
-        profile_lower_bar_positions[active_default_layer][toggle_id] = omni_status_load_bar(active_default_layer, false, toggle_id);
+        profile_toggle_states[active_default_layer][toggle_id] = omni_status_load_toggle_enabled(active_default_layer, toggle_id);
+        profile_upper_bar_positions[active_default_layer][toggle_id] = omni_status_load_bar_value(active_default_layer, true, toggle_id);
+        profile_lower_bar_positions[active_default_layer][toggle_id] = omni_status_load_bar_value(active_default_layer, false, toggle_id);
     }
     apply_current_profile_parameters();
 }
@@ -432,7 +432,7 @@ static bool handle_auto_os_button_touch(painter_device_t display, painter_font_h
     selected_toggle_index = -1;
     clear_status_detail_area(display);
     draw_status_detail_message(display, font, "Automatic OS detection");
-    omni_status_save_toggle_aos(is_on_aos);
+    omni_status_save_auto_os_enabled(is_on_aos);
     redraw_status_view(display, font);
     return true;
 }
@@ -453,7 +453,7 @@ static bool handle_manual_os_button_touch(painter_device_t display, painter_font
         clear_status_detail_area(display);
         const char *message = (next_layer == _BASE) ? "Keymap Change Base" : "Keymap Change Sub";
         draw_status_detail_message(display, font, message);
-        omni_status_save_toggle_osc(active_default_layer);
+        omni_status_save_manual_layer(active_default_layer);
         redraw_status_view(display, font);
     } else {
         redraw_status_view(display, font);
@@ -489,8 +489,8 @@ static bool handle_toggle_button_touch(painter_device_t display, painter_font_ha
             selected_toggle_index = -1;
         } else {
             selected_toggle_index = toggle_id;
-            const uint8_t upper_position = STATUS_BAR_LEFT + omni_status_load_bar(profile, true, toggle_id);
-            const uint8_t lower_position = STATUS_BAR_LEFT + omni_status_load_bar(profile, false, toggle_id);
+            const uint8_t upper_position = STATUS_BAR_LEFT + omni_status_load_bar_value(profile, true, toggle_id);
+            const uint8_t lower_position = STATUS_BAR_LEFT + omni_status_load_bar_value(profile, false, toggle_id);
             if (toggle_config->bar_mode >= STATUS_BAR_UPPER_ONLY) {
                 draw_parameter_bar(display, STATUS_UPPER_BAR_Y, hue_main_color, sat_main_color, upper_position, font, label_line_height, toggle_config->bar_upper);
             }
@@ -534,14 +534,14 @@ static void handle_parameter_bar_touch(painter_device_t display, painter_font_ha
         const uint8_t parameter_value = profile_upper_bar_positions[profile][toggle_id] - STATUS_BAR_LEFT;
         draw_parameter_bar(display, STATUS_UPPER_BAR_Y, hue_main_color, sat_main_color, profile_upper_bar_positions[profile][toggle_id], font, label_line_height, toggle_config->bar_upper);
         apply_toggle_parameter(toggle_id, true, parameter_value);
-        omni_status_save_bar(profile, true, toggle_id, parameter_value);
+        omni_status_save_bar_value(profile, true, toggle_id, parameter_value);
     }
     if (toggle_config->bar_mode == STATUS_BAR_UPPER_AND_LOWER && point_in_rect(touch_x, touch_y, lower_touch_area)) {
         profile_lower_bar_positions[profile][toggle_id] = clamp_bar_x(touch_x);
         const uint8_t parameter_value = profile_lower_bar_positions[profile][toggle_id] - STATUS_BAR_LEFT;
         draw_parameter_bar(display, STATUS_LOWER_BAR_Y, hue_main_color, sat_main_color, profile_lower_bar_positions[profile][toggle_id], font, label_line_height, toggle_config->bar_lower);
         apply_toggle_parameter(toggle_id, false, parameter_value);
-        omni_status_save_bar(profile, false, toggle_id, parameter_value);
+        omni_status_save_bar_value(profile, false, toggle_id, parameter_value);
     }
 }
 
@@ -565,14 +565,14 @@ void status_view_init(painter_device_t display, painter_font_handle_t font) {
 }
 
 static void load_profile_toggle_states(void) {
-    is_on_aos = omni_status_load_toggle_aos();
+    is_on_aos = omni_status_load_auto_os_enabled();
     if (!is_on_aos) {
-        active_default_layer = omni_status_load_toggle_osc();
+        active_default_layer = omni_status_load_manual_layer();
         default_layer_set(1UL << active_default_layer);
     }
     for (status_profile_t profile = 0; profile < STATUS_PROFILE_COUNT; profile++) {
         for (status_toggle_id_t toggle_id = 0; toggle_id < STATUS_TOGGLE_COUNT; toggle_id++) {
-            profile_toggle_states[profile][toggle_id] = omni_status_load_toggle_normal(profile, toggle_id);
+            profile_toggle_states[profile][toggle_id] = omni_status_load_toggle_enabled(profile, toggle_id);
         }
     }
 }

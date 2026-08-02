@@ -156,7 +156,7 @@ void trackball_tuning_handle_touch(painter_device_t display, painter_font_handle
     const tuning_point_t save_button_center = {SAVE_BUTTON_X, SAVE_BUTTON_Y + 5};
     bool tuning_value_changed = update_tuning_values(touch_x, touch_y);
     if (!tuning_value_changed && is_touch_in_circle(touch_x, touch_y, save_button_center, TUNING_BUTTON_RADIUS)) {
-        save_omni_tb_config();
+        omni_config_save_trackball();
         trackball_tuning_draw(display, font);
     }
     redraw_changed_curve(display);
