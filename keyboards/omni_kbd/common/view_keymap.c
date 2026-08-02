@@ -2,13 +2,58 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "view_keymap.h"
-#include "qp.h"
+
 #include "dynamic_keymap.h"
-#include <print.h>
-#include "../omni_cs/omni_cs.h"
+#include "omni_layers.h"
+#include "quantum.h"
 
+enum {
+    KEYMAP_DISPLAY_WIDTH  = 200,
+    KEYMAP_DISPLAY_HEIGHT = 80,
+    KEYMAP_MARGIN_X       = 2,
+    KEYMAP_MARGIN_Y       = 2,
+    KEYMAP_LOGICAL_COLS   = 14,
+    KEYMAP_KEY_ROWS       = 4,
+    KEYMAP_VISIBLE_WIDTH  = KEYMAP_DISPLAY_WIDTH - 2 * KEYMAP_MARGIN_X,
+    KEYMAP_VISIBLE_HEIGHT = KEYMAP_DISPLAY_HEIGHT - 2 * KEYMAP_MARGIN_Y,
+    KEYMAP_KEY_WIDTH      = KEYMAP_VISIBLE_WIDTH / KEYMAP_LOGICAL_COLS,
+    KEYMAP_KEY_HEIGHT     = KEYMAP_VISIBLE_HEIGHT / KEYMAP_KEY_ROWS,
+};
 
-keyboard_layout_t current_layout = KEYBOARD_LAYOUT_US;
+typedef enum {
+    KEYBOARD_LAYOUT_US,
+    KEYBOARD_LAYOUT_JIS,
+} keyboard_layout_t;
+
+#define F1 ' '
+#define F13 ','
+
+#define CL '/'
+#define CR '0'
+#define CS '1'
+#define SH '2'
+#define CT '3'
+#define AL '4'
+#define GU '5'
+#define SP '9'
+#define EN ':'
+#define BS ';'
+#define TA '<'
+
+#define L1 '>'
+#define L2 '?'
+#define L3 '@'
+#define L4 'A'
+#define L5 'B'
+#define L6 'C'
+#define L7 'D'
+#define L8 'E'
+#define L9 'F'
+
+#define ES 'G'
+#define DE 'H'
+
+static const keyboard_layout_t current_layout = KEYBOARD_LAYOUT_US;
 
 const char *get_layer_name(uint8_t layer) {
     switch (layer) {
@@ -31,7 +76,7 @@ const char *get_layer_name(uint8_t layer) {
 
 
 // USは未対応
-const char* get_display_string_us(uint16_t keycode) {
+static const char *get_display_string_us(uint16_t keycode) {
     if ((keycode & 0xFF) == KC_NO) return " ";
     uint16_t base = keycode;
     if (base >= KC_A && base <= KC_Z) {
@@ -85,7 +130,7 @@ const char* get_display_string_us(uint16_t keycode) {
 }
 
 
-const char* get_display_string_jis(uint16_t keycode) {
+static const char *get_display_string_jis(uint16_t keycode) {
     if ((keycode) == KC_NO) return " ";
     uint16_t base = keycode;
     if (base >= KC_A && base <= KC_Z) {
@@ -165,27 +210,12 @@ const char* get_display_string_jis(uint16_t keycode) {
     return "-";
 }
 
-const char* get_display_string_from_keycode(uint16_t keycode) {
-
-    if ((keycode & 0xFF) == KC_NO) {
-        return " ";  
-    }
-
-    switch (current_layout) {
-        case KEYBOARD_LAYOUT_JIS:
-            return get_display_string_jis(keycode);
-        case KEYBOARD_LAYOUT_US:
-        default:
-            return get_display_string_us(keycode);
-    }
-}
-
 typedef struct {
     const char* label;
     bool is_special;
 } display_label_t;
 
-display_label_t get_display_label(uint16_t keycode) {
+static display_label_t get_display_label(uint16_t keycode) {
     display_label_t dl = { .label = " ", .is_special = false };
 
     switch (current_layout) {
@@ -287,60 +317,60 @@ void draw_key_matrix(painter_device_t display, painter_font_handle_t font1, pain
             uint8_t matrix_col = col % 6;
 
             uint8_t adjusted_col = (col < 6) ? col : col + 3;
-            int x = MARGIN_X + adjusted_col * KEY_WIDTH + 5;
-            int y = MARGIN_Y + row * KEY_HEIGHT + 70;
+            int x = KEYMAP_MARGIN_X + adjusted_col * KEYMAP_KEY_WIDTH + 5;
+            int y = KEYMAP_MARGIN_Y + row * KEYMAP_KEY_HEIGHT + 70;
 
             uint16_t keycode = dynamic_keymap_get_keycode(current_layer, matrix_row, matrix_col);
             // uprintf("r: %d, c: %d, code: %d\n", matrix_row, matrix_col, keycode);     
             display_label_t dl = get_display_label(keycode);
-            qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+            qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
         }
     }
 
     {
         uint8_t row = 3;
-        int y = MARGIN_Y + row * KEY_HEIGHT + 70;
+        int y = KEYMAP_MARGIN_Y + row * KEYMAP_KEY_HEIGHT + 70;
 
 
         for (uint8_t col = 0; col < 6; col++) {
-            int x = MARGIN_X + col * KEY_WIDTH + 5;
+            int x = KEYMAP_MARGIN_X + col * KEYMAP_KEY_WIDTH + 5;
             uint16_t keycode = dynamic_keymap_get_keycode(current_layer, 3, col);
             // uprintf("r: %d, c: %d, code: %d\n", 3, col, keycode);     
             display_label_t dl = get_display_label(keycode);
-            qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+            qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
         }
 
         // R31
-        int x = MARGIN_X + 6 * KEY_WIDTH + 5;
+        int x = KEYMAP_MARGIN_X + 6 * KEYMAP_KEY_WIDTH + 5;
         uint16_t keycode = dynamic_keymap_get_keycode(current_layer, 19, 1);
         // uprintf("r: %d, c: %d, code: %d\n", 19, 1, keycode); 
         display_label_t dl = get_display_label(keycode);
-        qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+        qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
 
-        x = MARGIN_X + 8 * KEY_WIDTH + 5;
+        x = KEYMAP_MARGIN_X + 8 * KEYMAP_KEY_WIDTH + 5;
         keycode = dynamic_keymap_get_keycode(current_layer, 19, 2);
         // uprintf("r: %d, c: %d, code: %d\n", 19, 2, keycode); 
         dl = get_display_label(keycode);
-        qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+        qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
 
-        x = MARGIN_X + 9 * KEY_WIDTH + 5;
+        x = KEYMAP_MARGIN_X + 9 * KEYMAP_KEY_WIDTH + 5;
         keycode = dynamic_keymap_get_keycode(current_layer, 19, 3);
         // uprintf("r: %d, c: %d, code: %d\n", 19, 3, keycode); 
         dl = get_display_label(keycode);
-        qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+        qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
 
-        x = MARGIN_X + 14 * KEY_WIDTH + 5;
+        x = KEYMAP_MARGIN_X + 14 * KEYMAP_KEY_WIDTH + 5;
         keycode = dynamic_keymap_get_keycode(current_layer, 19, 5);
         // uprintf("r: %d, c: %d, code: %d\n", 19, 5, keycode); 
         dl = get_display_label(keycode);
-        qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+        qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
 
-        x = MARGIN_X + 1.5 * KEY_WIDTH + 5;
-        y = MARGIN_Y + 4 * KEY_HEIGHT + 70;
+        x = KEYMAP_MARGIN_X + 1.5 * KEYMAP_KEY_WIDTH + 5;
+        y = KEYMAP_MARGIN_Y + 4 * KEYMAP_KEY_HEIGHT + 70;
         keycode = dynamic_keymap_get_keycode(current_layer, 19, 0);
         // uprintf("r: %d, c: %d, code: %d\n", 19, 0, keycode); 
         dl = get_display_label(keycode);
-        qp_drawtext(display, x + KEY_WIDTH / 2, y + KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
+        qp_drawtext(display, x + KEYMAP_KEY_WIDTH / 2, y + KEYMAP_KEY_HEIGHT / 2, dl.is_special ? font2 : font1, dl.label);
     }
 
     qp_flush(display);

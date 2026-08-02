@@ -1,14 +1,38 @@
 // Copyright 2025 mass
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <print.h>
 #include "os_detection.h"
 #include "status_view.h"
 #include "draw_custom.h"
 #include "config_omni.h"
+#include "omni_layers.h"
 #include "touch_gesture.h"
 #include "touch_lcd_omni.h"
 #include "trackball_omni.h"
+
+enum {
+    BTN_W  = 52,
+    BTN_H  = 26,
+    BTN_R  = 6,
+    BAR_L  = 90,
+    BAR_R  = 190,
+    BAR_Y1 = 175,
+    BAR_Y2 = 200,
+    COL0_X = 90,
+    COL1_X = 150,
+    COL2_X = 50,
+    COL3_X = 120,
+    COL4_X = 190,
+    ROW0_Y = 35,
+    ROW1_Y = 70,
+    ROW2_Y = 105,
+};
+
+typedef enum {
+    PROF_BASE = 0,
+    PROF_SUB,
+    PROF_COUNT,
+} prof_index_t;
 
 static inline uint8_t clamp_u8(int16_t v, uint8_t lo, uint8_t hi) {
     if (v < lo) v = lo;
@@ -56,7 +80,7 @@ static const char *const os_name_tbl[] = {
     [OS_IOS]     = "Mac", // 誤判定があるからiOSはMac扱い
 };
 
-const char *os_name_short(os_variant_t os) {
+static const char *os_name_short(os_variant_t os) {
     if (!is_on_aos) {
         return (get_highest_layer(default_layer_state) == _BASE) ? "Sub" : "Bas";
     }
@@ -100,10 +124,10 @@ static inline prof_index_t current_profile_index(void) {
     return is_sub_layer() ? PROF_SUB : PROF_BASE;
 }
 
-bool sv_hrv_enabled_current(void) {
+static bool sv_hrv_enabled_current(void) {
     return os_tog_state[current_profile_index()][IDX_HRV] != 0;
 }
-bool sv_hrh_enabled_current(void) {
+static bool sv_hrh_enabled_current(void) {
     return os_tog_state[current_profile_index()][IDX_HRH] != 0;
 }
 
