@@ -16,9 +16,7 @@ typedef struct {
     uint8_t gesture_id;
 } touch_gesture_event_t;
 
-typedef void (*touch_gesture_handler_t)(const touch_gesture_event_t *event, const void *context);
-
-void touch_gesture_task(touch_gesture_handler_t event_handler, const void *context);
+bool touch_gesture_task(touch_gesture_event_t *event);
 
 uint16_t touch_gesture_repeat_interval(void);
 void touch_gesture_set_repeat_interval(uint16_t interval);

@@ -23,9 +23,7 @@ void draw_background_all_black(painter_device_t device) {
     qp_rect(device, 0, 0, TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, 0, 0, 0, true);
 }
 
-static void process_touch_event(const touch_gesture_event_t *event, const void *context_data) {
-    const omni_display_context_t *context = context_data;
-
+static void process_touch_event(const touch_gesture_event_t *event, const omni_display_context_t *context) {
     switch (current_display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
             if (event->interaction == TOUCH_INTERACTION_PRESS) {
@@ -49,7 +47,10 @@ static void process_touch_event(const touch_gesture_event_t *event, const void *
 }
 
 void process_touch_interrupt(const omni_display_context_t *context) {
-    touch_gesture_task(process_touch_event, context);
+    touch_gesture_event_t event;
+    if (touch_gesture_task(&event)) {
+        process_touch_event(&event, context);
+    }
 }
 
 display_mode_t display_get_mode(void) {
