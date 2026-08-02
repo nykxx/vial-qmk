@@ -268,11 +268,9 @@ static void redraw_all(painter_device_t dev, painter_font_handle_t font) {
 }
 
 void load_params_from_prms(void){
-    uint8_t row1 = (g_default_layer == 0) ? 8 : 14;
-    uint8_t row2 = (g_default_layer == 0) ? 9 : 15;
     for (uint8_t i = 0; i < NUM_TOG; i++) {
-        apply_to_param(i, true, dynamic_keymap_get_keycode(4, row1, i) - 0x7700);
-        apply_to_param(i, false, dynamic_keymap_get_keycode(4, row2, i) - 0x7700);
+        apply_to_param(i, true, omni_status_load_parameter_value(g_default_layer, true, i));
+        apply_to_param(i, false, omni_status_load_parameter_value(g_default_layer, false, i));
     }
 }
 
@@ -367,15 +365,12 @@ void ui_handle_touch(painter_device_t dev, painter_font_handle_t font, int16_t t
         const bool new_state = (os_tog_state[pi][i] != 0);
         qp_rect(dev, 0, 130, 240, 150, 0, 0, 0, true);
         qp_rect(dev, 0, 160, 240, 240, 0, 0, 0, true);
-        uint8_t row1 = (g_default_layer == 0) ? 8 : 14;
-        uint8_t row2 = (g_default_layer == 0) ? 9 : 15;
-
         if (!new_state) {
             sel_idx = -1;
             draw_toggle_normal(i, dev, font, hue_main_color, sat_main_color, 190);
 
-            apply_to_param(i, true, dynamic_keymap_get_keycode(4, row1, i) - 0x7700);
-            apply_to_param(i, false, dynamic_keymap_get_keycode(4, row2, i) - 0x7700);
+            apply_to_param(i, true, omni_status_load_parameter_value(g_default_layer, true, i));
+            apply_to_param(i, false, omni_status_load_parameter_value(g_default_layer, false, i));
 
             return;
         }
@@ -403,8 +398,8 @@ void ui_handle_touch(painter_device_t dev, painter_font_handle_t font, int16_t t
 
 
 
-        apply_to_param(i, true, dynamic_keymap_get_keycode(4, row1, i) - 0x7700);
-        apply_to_param(i, false, dynamic_keymap_get_keycode(4, row2, i) - 0x7700);
+        apply_to_param(i, true, omni_status_load_parameter_value(g_default_layer, true, i));
+        apply_to_param(i, false, omni_status_load_parameter_value(g_default_layer, false, i));
         
         return;
     }

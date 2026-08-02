@@ -16,6 +16,7 @@
 #include "os_detection.h"
 
 #include "../common/trackball_omni.h"
+#include "../common/omni_virtual_keys.h"
 #include "../common/config_omni.h"
 #include "../common/sleeping_view.h"
 #include "../common/draw_custom.h"
@@ -46,7 +47,7 @@ static uint16_t sleeping_timer;
 static bool sleeping_state = false;
 static uint16_t draw_matrix_code_rain_timer = 0;
 static bool fast_draw_matrix_code_rain = false;
-static uint16_t virtual_keycode[KEYCODE_SIZE];
+static uint16_t virtual_keycode[OMNI_TOUCH_KEY_COUNT];
 static uint16_t blink_start_time = 0;
 static bool is_backlight_off = false;
 static bool lcd_is_on = true;
@@ -54,8 +55,6 @@ static uint8_t current_layer;
 static omni_display_context_t display_context;
 
 enum {
-    LCD_LAYER_COUNT        = MAX_LCD_LAYER + 1,
-    LCD_CATEGORY_COUNT     = MAX_LCD_CATEGORY + 1,
     LCD_BACKLIGHT_BLINK_MS = 50,
     STARTUP_ANIMATION_MS   = 3000,
     STARTUP_SETTLE_MS      = 300,
@@ -197,7 +196,7 @@ static void refresh_swipe_gesture_view(void) {
     save_omni_color_config();
     draw_background_all(display_context.device);
     swipe_gesture_draw_base(display_context.device);
-    swipe_gesture_draw_main(display_context.device, display_context.interface_font, touch_key_view_current_layer());
+    swipe_gesture_draw_main(display_context.device, display_context.interface_font, touch_key_view_current_page());
     swipe_gesture_draw_profile(display_context.device, display_context.interface_font);
 }
 
@@ -252,9 +251,9 @@ static void update_lcd_view_data(void){
 
 static void load_virtual_keys(void) {
     int key_index = 0;
-    for (int row = LCD_LAYER_COUNT; row < MATRIX_ROWS / 2; row++) {
+    for (int row = OMNI_TOUCH_KEY_MATRIX_ROW_START; row < OMNI_TOUCH_KEY_MATRIX_ROW_START + OMNI_TOUCH_KEY_MATRIX_ROW_COUNT; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
-            virtual_keycode[key_index] = keymap_key_to_keycode(2, (keypos_t){.row = row, .col = col});
+            virtual_keycode[key_index] = keymap_key_to_keycode(OMNI_TOUCH_KEY_DISPLAY_LAYER, (keypos_t){.row = row, .col = col});
             key_index++;
         }
     }

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "omni_image_loader.h"
+#include "../common/omni_keycode_encoding.h"
+#include "../common/omni_virtual_keys.h"
 #include "generated/omni_logo.qgf.h"
 #include "generated/save.qgf.h"
 #include "generated/layer_00.qgf.h"
@@ -105,19 +107,18 @@
 #include "generated/086.qgf.h"
 
 enum {
-    LAYER_IMAGE_COUNT = 12,
+    LAYER_IMAGE_COUNT = OMNI_TOUCH_KEY_MATRIX_ROW_COUNT,
 };
 
 enum {
-    MACRO_KEY_START = 0x7700,
-    MACRO_KEY_END   = 0x77FE,
-    MACRO_KEY_COUNT = MACRO_KEY_END - MACRO_KEY_START + 1,
+    MAX_ICON_INDEX  = UINT8_MAX - 1,
+    ICON_SLOT_COUNT = MAX_ICON_INDEX + 1,
 };
 
 static painter_image_handle_t logo_image;
 static painter_image_handle_t save_image;
 static painter_image_handle_t layer_images[LAYER_IMAGE_COUNT];
-static painter_image_handle_t keycode_images[MACRO_KEY_COUNT];
+static painter_image_handle_t keycode_images[ICON_SLOT_COUNT];
 
 void initialize_images(void) {
     logo_image = qp_load_image_mem(gfx_omni_logo);
@@ -236,8 +237,9 @@ painter_image_handle_t *omni_layer_image_handle(uint16_t layer_index) {
 }
 
 painter_image_handle_t *omni_keycode_image_handle(uint16_t keycode) {
-    if (keycode >= MACRO_KEY_START && keycode <= MACRO_KEY_END) {
-        return &keycode_images[keycode - MACRO_KEY_START];
+    int32_t icon_index = omni_icon_index_from_keycode(keycode);
+    if (icon_index >= 0 && icon_index <= MAX_ICON_INDEX) {
+        return &keycode_images[icon_index];
     }
     return &keycode_images[1];
 }

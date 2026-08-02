@@ -7,6 +7,30 @@
 #include "../../../common/status_view.h"
 #include "config.h"
 #include "dynamic_keymap.h"
+#include "../../../common/omni_keycode_encoding.h"
+#include "../../../common/omni_virtual_keys.h"
+
+enum {
+    LEGACY_AUTO_MOUSE_CONFIG_ROW    = 9,
+    LEGACY_AUTO_MOUSE_CONFIG_COLUMN = 0,
+};
+
+#define OMNI_DEFAULT_TOUCH_KEYCODES \
+    OMNI_MACRO_KEYCODE(0),  OMNI_MACRO_KEYCODE(1),  OMNI_MACRO_KEYCODE(2),  OMNI_MACRO_KEYCODE(3),  OMNI_MACRO_KEYCODE(4),  OMNI_MACRO_KEYCODE(5),  \
+    OMNI_MACRO_KEYCODE(6),  OMNI_MACRO_KEYCODE(7),  OMNI_MACRO_KEYCODE(8),  OMNI_MACRO_KEYCODE(9),  OMNI_MACRO_KEYCODE(10), OMNI_MACRO_KEYCODE(11), \
+    OMNI_MACRO_KEYCODE(12), OMNI_MACRO_KEYCODE(13), OMNI_MACRO_KEYCODE(14), OMNI_MACRO_KEYCODE(15), OMNI_MACRO_KEYCODE(16), OMNI_MACRO_KEYCODE(17), \
+    OMNI_MACRO_KEYCODE(18), OMNI_MACRO_KEYCODE(19), OMNI_MACRO_KEYCODE(20), OMNI_MACRO_KEYCODE(21), OMNI_MACRO_KEYCODE(22), OMNI_MACRO_KEYCODE(23), \
+    OMNI_MACRO_KEYCODE(24), OMNI_MACRO_KEYCODE(25), OMNI_MACRO_KEYCODE(26), OMNI_MACRO_KEYCODE(27), OMNI_MACRO_KEYCODE(28), OMNI_MACRO_KEYCODE(29), \
+    OMNI_MACRO_KEYCODE(30), OMNI_MACRO_KEYCODE(31), OMNI_MACRO_KEYCODE(32), OMNI_MACRO_KEYCODE(33), OMNI_MACRO_KEYCODE(34), OMNI_MACRO_KEYCODE(35), \
+    OMNI_MACRO_KEYCODE(36), OMNI_MACRO_KEYCODE(37), OMNI_MACRO_KEYCODE(38), OMNI_MACRO_KEYCODE(39), OMNI_MACRO_KEYCODE(40), OMNI_MACRO_KEYCODE(41), \
+    OMNI_MACRO_KEYCODE(42), OMNI_MACRO_KEYCODE(43), OMNI_MACRO_KEYCODE(44), OMNI_MACRO_KEYCODE(45), OMNI_MACRO_KEYCODE(46), OMNI_MACRO_KEYCODE(47), \
+    OMNI_MACRO_KEYCODE(48), OMNI_MACRO_KEYCODE(49), OMNI_MACRO_KEYCODE(50), OMNI_MACRO_KEYCODE(51), OMNI_MACRO_KEYCODE(52), OMNI_MACRO_KEYCODE(53), \
+    OMNI_MACRO_KEYCODE(54), OMNI_MACRO_KEYCODE(55), OMNI_MACRO_KEYCODE(56), OMNI_MACRO_KEYCODE(57), OMNI_MACRO_KEYCODE(58), OMNI_MACRO_KEYCODE(59), \
+    OMNI_MACRO_KEYCODE(60), OMNI_MACRO_KEYCODE(61), OMNI_MACRO_KEYCODE(62), OMNI_MACRO_KEYCODE(63), OMNI_MACRO_KEYCODE(64), OMNI_MACRO_KEYCODE(65), \
+    OMNI_MACRO_KEYCODE(66), OMNI_MACRO_KEYCODE(67), OMNI_MACRO_KEYCODE(68), OMNI_MACRO_KEYCODE(69), OMNI_MACRO_KEYCODE(70), OMNI_MACRO_KEYCODE(71)
+
+/* Expand grouped keycode lists before LAYOUT counts its arguments. */
+#define OMNI_LAYOUT(...) LAYOUT(__VA_ARGS__)
 
 #define LAYOUT( \
     L00, L01, L02, L03, L04, L05, R00, R01, R02, R03, R04, R05, \
@@ -77,7 +101,8 @@
 
 void pointing_device_init_user(void) {
     set_auto_mouse_layer(_MOUSE);
-    if (dynamic_keymap_get_keycode(3,9,0) == 0x7701) {
+    uint16_t stored_auto_mouse_state = dynamic_keymap_get_keycode(_NUM, LEGACY_AUTO_MOUSE_CONFIG_ROW, LEGACY_AUTO_MOUSE_CONFIG_COLUMN);
+    if (stored_auto_mouse_state == omni_stored_value_encode(1)) {
         set_auto_mouse_enable(true);
     } else {
         set_auto_mouse_enable(false);
@@ -88,24 +113,13 @@ void pointing_device_init_user(void) {
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [_BASE] = LAYOUT(
+    [_BASE] = OMNI_LAYOUT(
         KC_ESC,  KC_Q,    KC_W,    KC_E,     KC_R,    KC_T,                                     KC_Y,          KC_U,      KC_I,    KC_O,    KC_P,    KC_MINUS,
         KC_LSFT, KC_A,    KC_S,    KC_D,     KC_F,    KC_G,                                     KC_H,          KC_J,      KC_K,    KC_L,    KC_SCLN, KC_BSPC,
         KC_LCTL, KC_Z,    KC_X,    KC_C,     KC_V,    KC_B,                                     KC_N,          KC_M,      KC_COMM, KC_DOT,  KC_SLSH, KC_INT1,
         KC_TAB,  KC_LNG1, KC_LNG2, KC_LALT,  KC_BTN2, KC_BTN3, KC_BTN1,           LT(2,KC_SPC), LT(3,KC_ENT),  _______,                              LT(4,KC_SPC),
         KC_LGUI,     
-        0x7700, 0x7701, 0x7702, 0x7703, 0x7704, 0x7705,
-        0x7706, 0x7707, 0x7708, 0x7709, 0x770A, 0x770B,
-        0x770C, 0x770D, 0x770E, 0x770F, 0x7710, 0x7711,
-        0x7712, 0x7713, 0x7714, 0x7715, 0x7716, 0x7717,
-        0x7718, 0x7719, 0x771A, 0x771B, 0x771C, 0x771D,
-        0x771E, 0x771F, 0x7720, 0x7721, 0x7722, 0x7723,
-        0x7724, 0x7725, 0x7726, 0x7727, 0x7728, 0x7729,
-        0x772A, 0x772B, 0x772C, 0x772D, 0x772E, 0x772F,
-        0x7730, 0x7731, 0x7732, 0x7733, 0x7734, 0x7735,
-        0x7736, 0x7737, 0x7738, 0x7739, 0x773A, 0x773B,
-        0x773C, 0x773D, 0x773E, 0x773F, 0x7740, 0x7741,
-        0x7742, 0x7743, 0x7744, 0x7745, 0x7746, 0x7747,
+        OMNI_DEFAULT_TOUCH_KEYCODES,
         _______,	_______,	_______,	_______,	_______,	_______,
         _______,	_______,	_______,	_______,	_______,	_______,
         _______,	_______,	_______,	_______,	_______,	_______,
@@ -119,24 +133,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,	_______,	_______,	_______,	_______,	_______,
         _______,	_______,	_______,	_______,	_______,	_______
     ),
-    [_MARK] = LAYOUT(
+    [_MARK] = OMNI_LAYOUT(
         _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
         _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
         _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
         _______,    _______,   _______,  _______,   _______,  _______, _______,     _______,  _______,  _______,                              _______,
         _______,   
-        0x7700, 0x7701, 0x7702, 0x7703, 0x7704, 0x7705,   
-        0x7706, 0x7707, 0x7708, 0x7709, 0x770A, 0x770B,   
-        0x770C, 0x770D, 0x770E, 0x770F, 0x7710, 0x7711,
-        0x7712, 0x7713, 0x7714, 0x7715, 0x7716, 0x7717,
-        0x7718, 0x7719, 0x771A, 0x771B, 0x771C, 0x771D,
-        0x771E, 0x771F, 0x7720, 0x7721, 0x7722, 0x7723,
-        0x7724, 0x7725, 0x7726, 0x7727, 0x7728, 0x7729,
-        0x772A, 0x772B, 0x772C, 0x772D, 0x772E, 0x772F,
-        0x7730, 0x7731, 0x7732, 0x7733, 0x7734, 0x7735,
-        0x7736, 0x7737, 0x7738, 0x7739, 0x773A, 0x773B,
-        0x773C, 0x773D, 0x773E, 0x773F, 0x7740, 0x7741,
-        0x7742, 0x7743, 0x7744, 0x7745, 0x7746, 0x7747,
+        OMNI_DEFAULT_TOUCH_KEYCODES,
         _______,    _______,    _______,  _______,    _______,   _______,
         _______,    _______,    _______,  _______,    _______,   _______,
         _______,    _______,    _______,  _______,    _______,   _______,
@@ -152,24 +155,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
     ),
-    [_FUNC] = LAYOUT(
+    [_FUNC] = OMNI_LAYOUT(
         _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
         _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
         _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
         _______,    _______,   _______,  _______,   _______,  _______, _______,     _______,  _______,  _______,                              _______,
         _______,   
-        0x7700, 0x7701, 0x7702, 0x7703, 0x7704, 0x7705,   
-        0x7706, 0x7707, 0x7708, 0x7709, 0x770A, 0x770B,   
-        0x770C, 0x770D, 0x770E, 0x770F, 0x7710, 0x7711,
-        0x7712, 0x7713, 0x7714, 0x7715, 0x7716, 0x7717,
-        0x7718, 0x7719, 0x771A, 0x771B, 0x771C, 0x771D,
-        0x771E, 0x771F, 0x7720, 0x7721, 0x7722, 0x7723,
-        0x7724, 0x7725, 0x7726, 0x7727, 0x7728, 0x7729,
-        0x772A, 0x772B, 0x772C, 0x772D, 0x772E, 0x772F,
-        0x7730, 0x7731, 0x7732, 0x7733, 0x7734, 0x7735,
-        0x7736, 0x7737, 0x7738, 0x7739, 0x773A, 0x773B,
-        0x773C, 0x773D, 0x773E, 0x773F, 0x7740, 0x7741,
-        0x7742, 0x7743, 0x7744, 0x7745, 0x7746, 0x7747,
+        OMNI_DEFAULT_TOUCH_KEYCODES,
         _______,    _______,    _______,  _______,    _______,   _______,
         _______,    _______,    _______,  _______,    _______,   _______,
         _______,    _______,    _______,  _______,    _______,   _______,
@@ -185,7 +177,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
     ),
-    [_NUM] = LAYOUT(
+    [_NUM] = OMNI_LAYOUT(
         _______,    KC_1,      KC_2,      KC_3,      KC_4,    KC_5,                           KC_6,     KC_7,     KC_8,     KC_9,     KC_0,   KC_F12,
         _______,    KC_NO,     KC_NO,     KC_NO,     KC_NO,   KC_NO,                          KC_PPLS,  KC_PMNS,  KC_PAST,  KC_PSLS, KC_EQL, KC_DEL,
         _______,    KC_F1,     KC_F2,     KC_F3,     KC_F4,   KC_F5,                          KC_F6,    KC_F7,    KC_F8,    KC_F9,   KC_F10,  KC_F11,
@@ -218,7 +210,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
     ),
-    [_MOUSE] = LAYOUT(
+    [_MOUSE] = OMNI_LAYOUT(
         _______,  KC_NO,   KC_NO,    KC_UP,    KC_NO,     KC_NO,                          LSFT(KC_1),   LSFT(KC_SLSH), LSFT(KC_8),    LSFT(KC_9),    LSFT(KC_5),    LSFT(KC_EQL),
         _______,  KC_NO,   KC_LEFT,  KC_DOWN,  KC_RIGHT,  KC_NO,                          LSFT(KC_6),   LSFT(KC_INT3), KC_RBRC,       KC_NUHS,       KC_QUOT,       LSFT(KC_2),
         _______,  KC_NO,   KC_NO,    KC_NO,    KC_NO,     KC_NO,                          LSFT(KC_3),   KC_LBRC,       LSFT(KC_RBRC), LSFT(KC_NUHS), LSFT(KC_LBRC), LSFT(KC_7),
@@ -249,7 +241,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______,
         _______, _______, _______, _______, _______, _______
     ),
-    [_CUSTOM] = LAYOUT(
+    [_CUSTOM] = OMNI_LAYOUT(
         KC_hue_bg_UP        , KC_hue_bg_DOWN        , KC_sat_bg_UP        , KC_sat_bg_DOWN        , KC_val_bg_UP         , KC_val_bg_DOWN        ,      KC_DP_TOUCH_KEY, KC_DP_TB_TUNE, KC_DP_SWIPE_GESTURE, KC_DP_KEY_MAT, KC_DP_STAT1, _______,
         KC_hue_main_color_UP, KC_hue_main_color_DOWN, KC_sat_main_color_UP, KC_sat_main_color_DOWN,  KC_val_main_color_UP, KC_val_main_color_DOWN,      _______, KC_BTN1, KC_BTN3, KC_BTN2, TB_R_MODE_TOGGLE, _______,
         KC_hue_sub_color_UP , KC_hue_sub_color_DOWN , KC_sat_sub_color_UP , KC_sat_sub_color_DOWN , KC_val_sub_color_UP  , KC_val_sub_color_DOWN ,      _______, _______, _______, _______, _______, _______,

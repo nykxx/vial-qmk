@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "../common/touch_gesture.h"
 #include "../common/touch_key_view.h"
+#include "../common/omni_virtual_keys.h"
 
 static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
 static const pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
@@ -140,7 +141,13 @@ static bool get_touch_coordinates(uint8_t *row, uint8_t *col, uint16_t touch_x, 
     uint8_t virtual_row;
     uint8_t virtual_column;
     if (touch_key_view_locate_key(touch_x, touch_y, &virtual_row, &virtual_column)) {
-        *row = virtual_row + MATRIX_ROWS + 4;
+        /*
+         * Legacy behavior: adding MATRIX_ROWS aliases QMK's cooked matrix and
+         * bypasses debounce for touch keys. This is an out-of-bounds access
+         * and must be replaced separately after establishing equivalent input
+         * timing on hardware.
+         */
+        *row = MATRIX_ROWS + omni_touch_key_matrix_row(virtual_row);
         *col = virtual_column;
         return true;
     }

@@ -74,7 +74,7 @@ void display_redraw(const omni_display_context_t *context, uint8_t current_layer
             draw_background_all(context->device);
             swipe_gesture_draw_profile(context->device, context->interface_font);
             swipe_gesture_draw_base(context->device);
-            swipe_gesture_draw_main(context->device, context->interface_font, touch_key_view_current_layer());
+            swipe_gesture_draw_main(context->device, context->interface_font, touch_key_view_current_page());
             break;
         case DISPLAY_MODE_KEY_MATRIX:
             draw_key_matrix(context->device, context->keymap_font, context->symbol_font, current_layer);
