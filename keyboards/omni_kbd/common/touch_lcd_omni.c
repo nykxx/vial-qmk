@@ -12,12 +12,11 @@
 #include "swipe_gesture.h"
 
 painter_device_t display;
-uint8_t current_layer = 0;
 painter_font_handle_t noto9_font;
 painter_font_handle_t noto11_font;
 painter_font_handle_t roboto_mono16;
 painter_font_handle_t st2_mono16;
-display_mode_t display_mode = DISPLAY_MODE_TOUCH_KEY;
+static display_mode_t current_display_mode = DISPLAY_MODE_TOUCH_KEY;
 
 void draw_background_all(void) {
     qp_rect(display, 0, 0, TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, hue_bg, sat_bg, val_bg, true);  // HSV: H=0, S=0, V=0 (黒色)
@@ -28,7 +27,7 @@ void draw_background_all_black(void) {
 }
 
 static void process_touch_event(const touch_gesture_event_t *event) {
-    switch (display_mode) {
+    switch (current_display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
             if (event->interaction == TOUCH_INTERACTION_PRESS) {
                 touch_gesture_activate_key(event->x, event->y);
@@ -54,8 +53,16 @@ void process_touch_interrupt(void) {
     touch_gesture_task(process_touch_event);
 }
 
-void display_redraw(void) {
-    switch (display_mode) {
+display_mode_t display_get_mode(void) {
+    return current_display_mode;
+}
+
+void display_set_mode(display_mode_t mode) {
+    current_display_mode = mode;
+}
+
+void display_redraw(uint8_t current_layer) {
+    switch (current_display_mode) {
         case DISPLAY_MODE_TOUCH_KEY:
             draw_background_all_black();
             touch_key_view_draw(display);

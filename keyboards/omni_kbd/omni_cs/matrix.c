@@ -194,28 +194,17 @@ bool matrix_scan_custom(matrix_row_t current_matrix[])
     }
     
 
-    switch (display_mode) {
-        case DISPLAY_MODE_TOUCH_KEY:
-            if (!touch_signal_latch) {
-                touch_gesture_clear_key_position();
+    if (display_get_mode() == DISPLAY_MODE_TOUCH_KEY) {
+        if (!touch_signal_latch) {
+            touch_gesture_clear_key_position();
+        }
+        if (timer_elapsed(last_touch_time) > touch_gesture_repeat_interval()) {
+            if (read_touch(current_matrix)) {
+                changed = true;
+                last_touch_time = timer_read();
+                touch_signal_latch = false;
             }
-            if (timer_elapsed(last_touch_time) > touch_gesture_repeat_interval()) {
-                if (read_touch(current_matrix)) {
-                    changed = true;
-                    last_touch_time = timer_read();  
-                    touch_signal_latch = false;
-                }
-            }
-            break;
-
-        case DISPLAY_MODE_TRACKBALL_TUNING:
-            break;
-
-        case DISPLAY_MODE_SWIPE_GESTURE:
-            break;
-            
-        default:
-            break;
+        }
     }
 
     last_matrix_state = changed;

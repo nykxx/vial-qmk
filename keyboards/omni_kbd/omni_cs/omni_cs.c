@@ -23,7 +23,6 @@
 #include "../common/power_lcd.h"
 #include "../common/status_view.h"
 #include "../common/swipe_gesture.h"
-#include "../common/trackball_tuning.h"
 #include "../common/touch_gesture.h"
 #include "../common/touch_key_view.h"
 #include "../drivers/pmw33xx_common.h"
@@ -51,6 +50,7 @@ static uint16_t virtual_keycode[KEYCODE_SIZE];
 static uint16_t blink_start_time = 0;
 static bool is_backlight_off = false;
 static bool lcd_is_on = true;
+static uint8_t current_layer;
 
 enum {
     LCD_LAYER_COUNT        = MAX_LCD_LAYER + 1,
@@ -67,9 +67,10 @@ static void update_layer_display(void) {
         return;
     }
 
-    if (display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
+    display_mode_t current_mode = display_get_mode();
+    if (current_mode == DISPLAY_MODE_SWIPE_GESTURE) {
         swipe_gesture_draw_main(display, noto11_font, current_layer);
-    } else if (display_mode == DISPLAY_MODE_KEY_MATRIX) {
+    } else if (current_mode == DISPLAY_MODE_KEY_MATRIX) {
         bool should_redraw = !get_auto_mouse_enable() || (current_layer != _MOUSE && pre_layer != _MOUSE);
         if (should_redraw) {
             draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
@@ -165,34 +166,29 @@ static bool process_color_keycode(uint16_t keycode) {
 }
 
 static bool process_display_keycode(uint16_t keycode) {
+    display_mode_t selected_mode;
     switch (keycode) {
         case KC_DP_TOUCH_KEY:
-            display_mode = DISPLAY_MODE_TOUCH_KEY;
-            draw_background_all_black();
-            touch_key_view_draw(display);
+            selected_mode = DISPLAY_MODE_TOUCH_KEY;
             break;
         case KC_DP_TB_TUNE:
-            display_mode = DISPLAY_MODE_TRACKBALL_TUNING;
-            trackball_tuning_draw(display, noto11_font);
+            selected_mode = DISPLAY_MODE_TRACKBALL_TUNING;
             break;
         case KC_DP_SWIPE_GESTURE:
-            display_mode = DISPLAY_MODE_SWIPE_GESTURE;
-            draw_background_all();
-            swipe_gesture_draw_profile(display, noto11_font);
-            swipe_gesture_draw_base(display);
-            swipe_gesture_draw_main(display, noto11_font, touch_key_view_current_layer());
+            selected_mode = DISPLAY_MODE_SWIPE_GESTURE;
             break;
         case KC_DP_KEY_MAT:
-            display_mode = DISPLAY_MODE_KEY_MATRIX;
-            draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
+            selected_mode = DISPLAY_MODE_KEY_MATRIX;
             break;
         case KC_DP_STAT1:
-            display_mode = DISPLAY_MODE_STATUS1;
-            status_view_init(display, noto9_font);
+            selected_mode = DISPLAY_MODE_STATUS1;
             break;
         default:
             return false;
     }
+
+    display_set_mode(selected_mode);
+    display_redraw(current_layer);
     return true;
 }
 
@@ -342,7 +338,7 @@ static void sleeping_kb(bool matrix_changed) {
             if (!lcd_is_on){
                 lcd_is_on = power_on_lcd();
             }
-            display_redraw();
+            display_redraw(current_layer);
             sleeping_state = false;
         }
     }
@@ -396,7 +392,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         keycode_handled = process_display_keycode(keycode);
     }
     if (keycode_handled) {
-        if (display_mode == DISPLAY_MODE_SWIPE_GESTURE) {
+        if (display_get_mode() == DISPLAY_MODE_SWIPE_GESTURE) {
             refresh_swipe_gesture_view();
         }
         return false;
@@ -429,6 +425,6 @@ void __wrap_dynamic_keymap_set_keycode(uint8_t layer, uint8_t row, uint8_t col, 
         load_omni_tb_config();
         load_omni_color_config();
         persist_load_all();
-        display_mode =  DISPLAY_MODE_TOUCH_KEY;
+        display_set_mode(DISPLAY_MODE_TOUCH_KEY);
     }
 }
