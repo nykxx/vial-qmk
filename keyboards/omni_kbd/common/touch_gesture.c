@@ -75,14 +75,14 @@ static uint8_t detect_gesture(int16_t delta_x, int16_t delta_y) {
     return GESTURE_NONE;
 }
 
-static void dispatch_event(touch_gesture_handler_t event_handler) {
+static void dispatch_event(touch_gesture_handler_t event_handler, const void *context) {
     touch_gesture_event_t event = {
         .interaction = current_interaction,
         .x = current_x,
         .y = current_y,
         .gesture_id = current_gesture_id,
     };
-    event_handler(&event);
+    event_handler(&event, context);
 }
 
 static void start_sequence(void) {
@@ -94,7 +94,7 @@ static void start_sequence(void) {
     uprintf("------START------\n");
 }
 
-static void detect_initial_event(uint16_t repeat_interval, touch_gesture_handler_t event_handler) {
+static void detect_initial_event(uint16_t repeat_interval, touch_gesture_handler_t event_handler, const void *context) {
     if (timer_elapsed(sequence_start_time) <= repeat_interval) {
         return;
     }
@@ -110,7 +110,7 @@ static void detect_initial_event(uint16_t repeat_interval, touch_gesture_handler
 
     current_interaction = detect_interaction(delta_x, delta_y);
     current_gesture_id = detect_gesture(delta_x, delta_y);
-    dispatch_event(event_handler);
+    dispatch_event(event_handler, context);
     current_state = TOUCH_STATE_SINGLE;
 }
 
@@ -128,7 +128,7 @@ static void start_repeat(uint16_t hold_interval) {
     }
 }
 
-static void repeat_event(uint16_t repeat_interval, touch_gesture_handler_t event_handler) {
+static void repeat_event(uint16_t repeat_interval, touch_gesture_handler_t event_handler, const void *context) {
     if (timer_elapsed(repeat_time) <= repeat_interval) {
         return;
     }
@@ -137,16 +137,16 @@ static void repeat_event(uint16_t repeat_interval, touch_gesture_handler_t event
     cst816t_XY point = cst816t_Get_Point();
     current_x = point.x_point;
     current_y = point.y_point;
-    dispatch_event(event_handler);
+    dispatch_event(event_handler, context);
 }
 
-static void process_active_touch(uint16_t repeat_interval, uint16_t hold_interval, touch_gesture_handler_t event_handler) {
+static void process_active_touch(uint16_t repeat_interval, uint16_t hold_interval, touch_gesture_handler_t event_handler, const void *context) {
     switch (current_state) {
         case TOUCH_STATE_NONE:
             start_sequence();
             break;
         case TOUCH_STATE_START:
-            detect_initial_event(repeat_interval, event_handler);
+            detect_initial_event(repeat_interval, event_handler, context);
             break;
         case TOUCH_STATE_SINGLE:
             finish_single_event(repeat_interval);
@@ -155,7 +155,7 @@ static void process_active_touch(uint16_t repeat_interval, uint16_t hold_interva
             start_repeat(hold_interval);
             break;
         case TOUCH_STATE_REPEAT:
-            repeat_event(repeat_interval, event_handler);
+            repeat_event(repeat_interval, event_handler, context);
             break;
     }
 }
@@ -171,11 +171,11 @@ static void reset_released_touch(uint16_t repeat_interval) {
     current_gesture_id = GESTURE_NONE;
 }
 
-void touch_gesture_task(touch_gesture_handler_t event_handler) {
+void touch_gesture_task(touch_gesture_handler_t event_handler, const void *context) {
     touch_input_task();
 
     if (touch_input_is_active()) {
-        process_active_touch(repeat_interval, hold_interval, event_handler);
+        process_active_touch(repeat_interval, hold_interval, event_handler, context);
     } else {
         reset_released_touch(repeat_interval);
     }

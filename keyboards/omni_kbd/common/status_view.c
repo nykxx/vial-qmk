@@ -441,7 +441,7 @@ void ui_handle_touch(painter_device_t dev, painter_font_handle_t font, int16_t t
 }
 
 void status_view_init(painter_device_t dev, painter_font_handle_t font) {
-    draw_background_all_black();
+    draw_background_all_black(dev);
     persist_load_all();
     redraw_all(dev, font);
 }
@@ -470,5 +470,4 @@ void sync_default_layer_to_os(void) {
     load_params_from_prms();
     
 }
-
 

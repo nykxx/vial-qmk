@@ -51,6 +51,7 @@ static uint16_t blink_start_time = 0;
 static bool is_backlight_off = false;
 static bool lcd_is_on = true;
 static uint8_t current_layer;
+static omni_display_context_t display_context;
 
 enum {
     LCD_LAYER_COUNT        = MAX_LCD_LAYER + 1,
@@ -69,11 +70,11 @@ static void update_layer_display(void) {
 
     display_mode_t current_mode = display_get_mode();
     if (current_mode == DISPLAY_MODE_SWIPE_GESTURE) {
-        swipe_gesture_draw_main(display, noto11_font, current_layer);
+        swipe_gesture_draw_main(display_context.device, display_context.interface_font, current_layer);
     } else if (current_mode == DISPLAY_MODE_KEY_MATRIX) {
         bool should_redraw = !get_auto_mouse_enable() || (current_layer != _MOUSE && pre_layer != _MOUSE);
         if (should_redraw) {
-            draw_key_matrix(display, roboto_mono16, st2_mono16, current_layer);
+            draw_key_matrix(display_context.device, display_context.keymap_font, display_context.symbol_font, current_layer);
         }
     }
 }
@@ -97,8 +98,8 @@ static void update_touch_feedback(void) {
 
 static void draw_second_frame(void) {
     if (!is_first_frame && is_second_frame) {
-        touch_key_view_draw(display);
-        qp_flush(display);
+        touch_key_view_draw(display_context.device);
+        qp_flush(display_context.device);
         is_second_frame = false;
     }
 }
@@ -188,16 +189,16 @@ static bool process_display_keycode(uint16_t keycode) {
     }
 
     display_set_mode(selected_mode);
-    display_redraw(current_layer);
+    display_redraw(&display_context, current_layer);
     return true;
 }
 
 static void refresh_swipe_gesture_view(void) {
     save_omni_color_config();
-    draw_background_all();
-    swipe_gesture_draw_base(display);
-    swipe_gesture_draw_main(display, noto11_font, touch_key_view_current_layer());
-    swipe_gesture_draw_profile(display, noto11_font);
+    draw_background_all(display_context.device);
+    swipe_gesture_draw_base(display_context.device);
+    swipe_gesture_draw_main(display_context.device, display_context.interface_font, touch_key_view_current_layer());
+    swipe_gesture_draw_profile(display_context.device, display_context.interface_font);
 }
 
 static void load_persistent_config(void) {
@@ -210,14 +211,14 @@ static void load_persistent_config(void) {
 }
 
 static void initialize_display(void) {
-    display = qp_gc9a01_make_spi_device(TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, CS_PIN, DC_PIN, RST_PIN, LCD_SPI_DIVISOR, 0);
-    qp_init(display, QP_ROTATION_0);
-    power_lcd_init(display, BLK_PIN);
+    display_context.device = qp_gc9a01_make_spi_device(TOUCH_LCD_WIDTH, TOUCH_LCD_HEIGHT, CS_PIN, DC_PIN, RST_PIN, LCD_SPI_DIVISOR, 0);
+    qp_init(display_context.device, QP_ROTATION_0);
+    power_lcd_init(display_context.device, BLK_PIN);
 
-    noto9_font    = qp_load_font_mem(font_noto9);
-    noto11_font   = qp_load_font_mem(font_noto11);
-    roboto_mono16 = qp_load_font_mem(font_roboto_mono16);
-    st2_mono16    = qp_load_font_mem(font_st2_mono16);
+    display_context.status_font    = qp_load_font_mem(font_noto9);
+    display_context.interface_font = qp_load_font_mem(font_noto11);
+    display_context.keymap_font    = qp_load_font_mem(font_roboto_mono16);
+    display_context.symbol_font    = qp_load_font_mem(font_st2_mono16);
 }
 
 static void initialize_touch_controller(void) {
@@ -230,23 +231,23 @@ static void initialize_touch_controller(void) {
 }
 
 static void show_startup_logo(void) {
-    draw_background_all_black();
+    draw_background_all_black(display_context.device);
     initialize_images();
-    qp_flush(display);
+    qp_flush(display_context.device);
 
     painter_image_handle_t logo_image = omni_logo_image();
     if (logo_image != NULL) {
         int logo_x_coordinate = (TOUCH_LCD_WIDTH - logo_image->width) / 2;
         int logo_y_coordinate = (TOUCH_LCD_HEIGHT - logo_image->height) / 2;
-        my_anim = qp_animate(display, logo_x_coordinate, logo_y_coordinate, logo_image);
+        my_anim = qp_animate(display_context.device, logo_x_coordinate, logo_y_coordinate, logo_image);
         lcd_fast_res_time = timer_read();
     }
 }
 
 static void update_lcd_view_data(void){
-    draw_background_all_black();
+    draw_background_all_black(display_context.device);
     touch_key_view_initialize(virtual_keycode);
-    touch_key_view_draw(display);
+    touch_key_view_draw(display_context.device);
 }
 
 static void load_virtual_keys(void) {
@@ -328,7 +329,7 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
 
 
 void matrix_scan_user(void) {
-    process_touch_interrupt();
+    process_touch_interrupt(&display_context);
 }
 
 static void sleeping_kb(bool matrix_changed) {
@@ -338,7 +339,7 @@ static void sleeping_kb(bool matrix_changed) {
             if (!lcd_is_on){
                 lcd_is_on = power_on_lcd();
             }
-            display_redraw(current_layer);
+            display_redraw(&display_context, current_layer);
             sleeping_state = false;
         }
     }
@@ -360,7 +361,7 @@ static void sleeping_kb(bool matrix_changed) {
                 fast_draw_matrix_code_rain = true;
             }
             update_matrix_code_rain();
-            draw_matrix_code_rain(display, noto11_font);
+            draw_matrix_code_rain(display_context.device, display_context.interface_font);
         }
     } 
 }
@@ -371,7 +372,7 @@ void housekeeping_task_user(void) {
         if (is_first_frame) {
             is_first_frame = false;
             qp_stop_animation(my_anim);
-            draw_background_all_black();
+            draw_background_all_black(display_context.device);
             touch_key_view_initialize(virtual_keycode);
         }
     }
