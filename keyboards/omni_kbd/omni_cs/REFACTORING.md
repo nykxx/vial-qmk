@@ -5,6 +5,9 @@
 `omni_kbd/omni_cs` の可読性と保守性を、既存のキーボード動作を維持したまま改善する。
 変更は `keyboards/omni_kbd` 内に限定し、挙動変更が必要な事項は実装前に確認する。
 
+LCD仮想キーの表示用レイヤー、matrix座標、実行時のレイヤー解決については、
+[`VIRTUAL_KEYS.md`](VIRTUAL_KEYS.md)に現在の仕様と処理経路を記録する。
+
 ## 現在の構成
 
 - `omni_cs/omni_cs.c`: QMK のキーボードフックを起点に、起動、LCD、2 個の
