@@ -12,6 +12,7 @@
 # Build artifacts
 .clang_complete
 .build/
+/logs/
 *.elf
 *.log
 *.lss
